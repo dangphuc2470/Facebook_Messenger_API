@@ -44,10 +44,18 @@ public class FacebookDemoApplication {
 		}
 		return challenge;
 	}
+	private String latestMessage = "";
+	@GetMapping(value = "latest-message")
+	public String getLatestMessage() {
+		String message = latestMessage;
+		latestMessage = null;
+		return message;
+	}
 
 	@PostMapping(value = "callback")
 	public String callback(@RequestBody String input) {
 		LOGGER.info("requestBody:" + input);
+		latestMessage = input;
 		return "OK";
 	}
 

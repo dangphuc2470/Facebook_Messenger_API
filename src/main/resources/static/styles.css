@@ -1,0 +1,120 @@
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('SF-Pro-Display-Regular.otf') format('opentype');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('SF-Pro-Display-Bold.otf') format('opentype');
+    font-weight: bold;
+}
+
+body {
+    font-family: 'SF Pro Display';
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.sidebar {
+    width: 200px;
+    height: 100vh;
+    background-color: #f1f1f1;
+    border-right: 1px solid #ddd;
+    padding: 1rem;
+}
+
+.sidebar-header {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.sidebar-contact {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-contact img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+
+.sidebar-contact span {
+    font-weight: bold;
+}
+
+.message-container {
+    flex: 1;
+    padding: 1rem;
+    height: 100vh;
+    overflow-y: scroll;
+    background-color: #fff;
+}
+
+.message {
+    margin-bottom: 1rem;
+    display: flex;
+}
+
+.message img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+
+.message-sender {
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+}
+
+.message-content {
+    background-color: #eee;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+}
+
+.message-container {
+    margin: 10px;
+    width: auto;
+    height: 400px;
+    background-color: #F0F4F9;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.message-container input {
+    height: 25px;
+    width: 90%;
+    border-radius: 20px;
+    border: none;
+    padding: 10px;
+}
+
+.message-container input:focus {
+    outline: none;
+}
+
+.message-container button {
+    margin-left: 10px;
+    width: 10%;
+    border-radius: 20px;
+    border: none;
+    background-color: white;
+}
+
+.message-container button:hover{
+    background-color: #91bdf4;
+}
+
+.message-container #send-section {
+    padding-left: 10px;
+    padding-bottom: 10px;
+    display: inline-flex;
+  }
