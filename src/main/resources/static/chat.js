@@ -6,6 +6,7 @@ document.getElementById('chat-send').addEventListener('click', function() {
         var newMessage = document.createElement('p');
         newMessage.textContent = "Send: " + chatInput.value;
         chatMessages.appendChild(newMessage);
+        SendMessage(chatInput.value);
 
         // Clear the input field and refocus it for the next message
         chatInput.value = '';
@@ -19,6 +20,35 @@ document.getElementById('chat-input').addEventListener('keypress', function(e) {
     }
 });
 
+function SendMessage(message) {
+    console.log('Send:', message);
+    var url = 'https://graph.facebook.com/v18.0/me/messages?access_token=EABsLirhuG9kBO1kHgWn5AecLhNPksgVKogL72F4oB8sCZB9roIZC02Uxv4IngGG0SZCJzseTeBwaJSyKK43ZAkZC5oR3Tg3iu3VSJGxl1c3VhFAFbIrBzWi1Cqt4gljsbIPJpxyXJsXKGw1QIVNgunF2d755bOXyqQ9FjZA17dyb5yUZC1eusvn7RL2orzrbT4ZD';
+
+    var data = {
+        "message": {
+            "text":message
+        },
+        "messaging_type": "RESPONSE",
+        "recipient": {
+            "id": "25240652615526181"
+        }
+    };
+
+    fetch(url, {
+        method: 'POST', 
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data), 
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
 
 // Hàm này sẽ được gọi để lấy dữ liệu mới từ server
 function fetchLatestMessage() {

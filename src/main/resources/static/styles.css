@@ -78,10 +78,31 @@ body {
     border-radius: 5px;
 }
 
-.message-container {
+.column {
     margin: 10px;
+
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    height: auto;
+}
+
+#see-more{
+    border: none;
+    background-color: transparent;
+}
+
+
+.message-container {
     width: auto;
-    height: 400px;
     background-color: #F0F4F9;
     border-radius: 20px;
     display: flex;
