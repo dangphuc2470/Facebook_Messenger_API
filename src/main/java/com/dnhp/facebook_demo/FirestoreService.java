@@ -13,45 +13,90 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 @Service
-public class FirestoreService {
+public class FirestoreService
+{
 	private final Firestore db;
-	public FirestoreService() {
+
+	public FirestoreService()
+	{
 		db = FirestoreClient.getFirestore();
 	}
 
-	public void sendMessage(String userId, String messageText, String senderId) {
-		Map<String, Object> data = new HashMap<>();
-		data.put("messageText", messageText);
-		data.put("timestamp", FieldValue.serverTimestamp());
-		data.put("senderId", senderId);
+	public void putReceivedMessage(String senderId, String messageText, long timestamp, String mid) throws ExecutionException, InterruptedException
+	{
+		// Create the message data
+		Map<String, Object> messageData = new HashMap<>();
+		messageData.put("messageText", messageText);
+		messageData.put("timestamp", timestamp);
+		messageData.put("mid", mid);
 
-		db.collection(userId).document().set(data);
+		// Check if the senderId document exists
+		DocumentSnapshot senderDoc = db.collection("message").document(senderId).get().get();
+		long count;
+		if (senderDoc.exists())
+		{
+			// If the document exists, get the conversationCount and increment it
+			Long conversationCount = senderDoc.getLong("conversationCount");
+			//count = conversationCount != null ? conversationCount + 1 : 1;
+			count = conversationCount;
+		} else
+		{
+			// If the document does not exist, set count to 1
+			count = 1;
+		}
+		DocumentSnapshot conversationMetadataSnapshot = db.collection("message").document(senderId).collection(String.valueOf(count)).document("conversation_metadata").get().get();
+		Long lastMessageTimestamp = conversationMetadataSnapshot.getLong("lastMessageTimestamp");
+		if (lastMessageTimestamp != null && (timestamp - lastMessageTimestamp) > 60 * 60 * 1000) // New conversation if the last message was sent more than an hour ago
+		{
+			count += 1;
+			senderDoc.getReference().update("conversationCount", count);
+			Logger.getGlobal().info("New conversation started");
+		}
+
+		// Save the message data to Firestore
+		db.collection("message").document(senderId).collection(String.valueOf(count)).document(mid).set(messageData);
+
+		// Update the conversationCount in the senderId document
+		Map<String, Object> senderData = new HashMap<>();
+		senderData.put("conversationCount", count);
+		db.collection("message").document(senderId).set(senderData);
+
+
+
+//		// Get the metadata document
+		DocumentSnapshot metadataDoc = db.collection("message").document(senderId).collection(String.valueOf(count)).document("conversation_metadata").get().get();
+//
+		// Create or update the metadata
+		Map<String, Object> metadata = new HashMap<>();
+		if (metadataDoc.exists())
+		{
+			metadata = metadataDoc.getData();
+		} else
+		{
+			metadata.put("firstMessageTimestamp", timestamp);
+		}
+		metadata.put("lastMessage", messageText);
+		metadata.put("lastMessageTimestamp", timestamp);
+		metadata.put("advisorId", null);
+
+		// Save the metadata to Firestore
+		db.collection("message").document(senderId).collection(String.valueOf(count)).document("conversation_metadata").set(metadata);
+
 	}
 
-	public void sendMessageToFacebook(String recipientId, String messageText) {
-		String url = "https://graph.facebook.com/v18.0/me/messages?access_token=EABsLirhuG9kBO1kHgWn5AecLhNPksgVKogL72F4oB8sCZB9roIZC02Uxv4IngGG0SZCJzseTeBwaJSyKK43ZAkZC5oR3Tg3iu3VSJGxl1c3VhFAFbIrBzWi1Cqt4gljsbIPJpxyXJsXKGw1QIVNgunF2d755bOXyqQ9FjZA17dyb5yUZC1eusvn7RL2orzrbT4ZD";
+public void putAdvisor(String advisorId, String name, String status) throws ExecutionException, InterruptedException {
+    // Create the advisor data
+    Map<String, Object> advisorData = new HashMap<>();
+    advisorData.put("name", name);
+    advisorData.put("status", status);
 
-		Map<String, Object> message = new HashMap<>();
-		message.put("text", messageText);
+    // Save the advisor data to Firestore
+    db.collection("advisors").document(advisorId).set(advisorData);
+}
 
-		Map<String, Object> recipient = new HashMap<>();
-		recipient.put("id", recipientId);
-
-		Map<String, Object> requestBody = new HashMap<>();
-		requestBody.put("message", message);
-		requestBody.put("messaging_type", "RESPONSE");
-		requestBody.put("recipient", recipient);
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
-		HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.postForObject(url, request, String.class);
-	}
 
 	public List<DocumentSnapshot> getMessageHistory(String userId) throws ExecutionException, InterruptedException {
 		List<QueryDocumentSnapshot> queryDocumentSnapshots = db.collection(userId).orderBy("timestamp").get().get().getDocuments();

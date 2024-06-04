@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootApplication
 @RestController
@@ -87,7 +88,7 @@ public class FacebookDemoApplication
     }
 
     @PostMapping(value = "callback")
-    public String callback(@RequestBody String input)
+    public String callback(@RequestBody String input) throws ExecutionException, InterruptedException
     {
         LOGGER.info("requestBody:" + input);
         latestMessage = input;
@@ -95,12 +96,19 @@ public class FacebookDemoApplication
         // Parse the input string to JSON
         JSONObject jsonObject = new JSONObject(input);
 
-        // Get the sender ID and message text
-        String senderId = jsonObject.getJSONArray("entry").getJSONObject(0).getJSONArray("messaging").getJSONObject(0).getJSONObject("sender").getString("id");
-        String messageText = jsonObject.getJSONArray("entry").getJSONObject(0).getJSONArray("messaging").getJSONObject(0).getJSONObject("message").getString("text");
+        JSONObject firstEntry = jsonObject.getJSONArray("entry").getJSONObject(0);
+        long time = firstEntry.getLong("time");
+        String entryId = firstEntry.getString("id");
+
+        JSONObject firstMessaging = firstEntry.getJSONArray("messaging").getJSONObject(0);
+        String senderId = firstMessaging.getJSONObject("sender").getString("id");
+        String recipientId = firstMessaging.getJSONObject("recipient").getString("id");
+        long timestamp = firstMessaging.getLong("timestamp");
+        String mid = firstMessaging.getJSONObject("message").getString("mid");
+        String messageText = firstMessaging.getJSONObject("message").getString("text");
 
         // Save the message to Firestore
-        firestoreService.sendMessage(senderId, messageText, "Facebook");
+        firestoreService.putReceivedMessage(senderId, messageText, timestamp, mid);
 
         return "OK";
     }
@@ -141,7 +149,7 @@ public class FacebookDemoApplication
         if (message != null)
         {
             // Replace "userId" and "senderId" with the actual user ID and sender ID
-            firestoreService.sendMessage("userId", message, "senderId");
+            //firestoreService.sendMessage("userId", message, "senderId");
             LOGGER.info(message);
             return ResponseEntity.ok("Message sent");
         } else
@@ -150,6 +158,5 @@ public class FacebookDemoApplication
         }
     }
 }
-
 
 
