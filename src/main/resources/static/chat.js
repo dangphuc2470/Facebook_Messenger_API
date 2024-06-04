@@ -6,7 +6,24 @@ document.getElementById('chat-send').addEventListener('click', function() {
         var newMessage = document.createElement('p');
         newMessage.textContent = "Send: " + chatInput.value;
         chatMessages.appendChild(newMessage);
-        SendMessage(chatInput.value);
+
+        // Send the message to the Spring Boot application
+        fetch('/send-message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: chatInput.value
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
 
         // Clear the input field and refocus it for the next message
         chatInput.value = '';
