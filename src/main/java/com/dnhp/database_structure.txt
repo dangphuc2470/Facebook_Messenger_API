@@ -1,0 +1,17 @@
+- message (collection)
+        - senderId (document)
+                    - conversationCount (field)
+                    - conversation_id (document)
+                        - mid (document)
+                                - messageText (field)
+                                - timestamp (field)
+                                - mid (field)
+                                - advisorId (field)
+                        - conversation_metadata (document)
+                                - firstMessageTimestamp (field)
+                                - lastMessage (field)
+                                - lastMessageTimestamp (field)
+                                - advisorId (field)
+
+- advisor (collection)
+        

@@ -98,11 +98,11 @@ public void putAdvisor(String advisorId, String name, String status) throws Exec
 }
 
 
-	public List<DocumentSnapshot> getMessageHistory(String userId) throws ExecutionException, InterruptedException {
-		List<QueryDocumentSnapshot> queryDocumentSnapshots = db.collection(userId).orderBy("timestamp").get().get().getDocuments();
-		List<DocumentSnapshot> documentSnapshots = new ArrayList<>(queryDocumentSnapshots);
-		return documentSnapshots;
-	}
+	// public List<DocumentSnapshot> getMessageHistory(String userId) throws ExecutionException, InterruptedException {
+	// 	List<QueryDocumentSnapshot> queryDocumentSnapshots = 		db.collection("message").document("25240652615526181").collection(String.valueOf(1)).document("1").zorderBy("timestamp").get().get().getDocuments();
+	// 	List<DocumentSnapshot> documentSnapshots = new ArrayList<>(queryDocumentSnapshots);
+	// 	return documentSnapshots;
+	// }
 
 	public DocumentSnapshot getLastMessage(String userId) throws ExecutionException, InterruptedException {
 		return db.collection(userId).orderBy("timestamp", Query.Direction.DESCENDING).limit(1).get().get().getDocuments().get(0);

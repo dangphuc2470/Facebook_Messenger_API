@@ -1,38 +1,30 @@
 package com.dnhp.facebook_demo;
 
 import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.Query;
 import com.google.firebase.cloud.FirestoreClient;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import org.json.JSONObject;
 
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootApplication
 @RestController
@@ -112,6 +104,53 @@ public class FacebookDemoApplication
 
         return "OK";
     }
+
+    @GetMapping("/get-messages")
+    public Map<String, Map<String, Object>> getMessages() throws ExecutionException, InterruptedException
+    {
+        Firestore db = FirestoreClient.getFirestore();
+        Map
+                <String,
+                        Map<String, Object>> allMessages = new HashMap<>();
+
+        // Get the sender document
+        DocumentSnapshot senderDoc = db.collection("message").document("25240652615526181").get().get();
+        if (senderDoc.exists())
+        {
+            // Get all conversation documents for this sender
+            List<QueryDocumentSnapshot> conversations = db.collection("message").document("25240652615526181").collection("1").get().get().getDocuments();
+            for (QueryDocumentSnapshot conversation : conversations)
+            {
+                String conversationId = conversation.getId();
+                if (conversationId.equals("conversation_metadata"))
+                {
+                    continue;
+                }
+                Map<String, Object> conversationMessages = new HashMap<>();
+
+                // Get all fields for this conversation
+                Map<String, Object> fields = conversation.getData();
+                String messageText = (String) fields.get("messageText");
+                Long timestamp = (Long) fields.get("timestamp");
+                String mid = (String) fields.get("mid");
+                String advisorId = (String) fields.get("advisorId");
+
+                // Add these fields to the conversation messages
+                conversationMessages.put("messageText", messageText);
+                conversationMessages.put("timestamp", timestamp);
+                conversationMessages.put("mid", mid);
+                conversationMessages.put("advisorId", advisorId);
+                allMessages.put(conversationId, conversationMessages);
+
+            }
+
+            // Add the conversation messages to the all messages
+
+        }
+        LOGGER.info(allMessages.toString());
+        return allMessages;
+    }
+
 
     @GetMapping("/hello")
     public String sayHello(@RequestParam(value = "myName", defaultValue = "World") String name)
