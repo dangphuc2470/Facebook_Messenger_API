@@ -121,7 +121,8 @@ if (chatBoxElementCount < dataElementCount) {
         // Create a new p element for the sender's ID
         const idElement = document.createElement('p');
         idElement.id = "id";
-        idElement.textContent = `${messageData.senderID}`;
+        // Todo: Remove hardcode
+        idElement.textContent = "Phúc Đặng";
 
         // Append the idElement to the chatBox
         chatBox.appendChild(idElement);
@@ -129,6 +130,8 @@ if (chatBoxElementCount < dataElementCount) {
         // Create a new div element with class "row-mess"
         const rowElement = document.createElement('div');
         rowElement.className = 'row-mess';
+        // Convert the timestamp to a human-readable format
+       
         rowElement.setAttribute('data-timestamp', messageData.timestamp);
 
         // Create a new div for the image
@@ -136,7 +139,7 @@ if (chatBoxElementCount < dataElementCount) {
 
         // Create a new img element and append it to imageDiv
         const imageElement = document.createElement('img');
-        imageElement.src = 'avatar1.jpg'; // Replace with the actual path to your image
+        imageElement.src = 'avatar3.jpg'; // Replace with the actual path to your image
         imageElement.alt = 'Image description'; // Replace with a suitable alt text
         imageDiv.appendChild(imageElement);
 
@@ -151,7 +154,7 @@ if (chatBoxElementCount < dataElementCount) {
         messageTextElement.textContent = `${messageData.messageText}`;
         messageSpan.appendChild(messageTextElement);
 
-        // Apply conditional styling based on the sender's ID
+        // Todo: Remove hardcode
         if (messageData.senderID === '25240652615526181') {
             messageSpan.style.textAlign = 'right';
             messageSpan.style.backgroundColor = '#D3E3FD';
@@ -169,7 +172,20 @@ if (chatBoxElementCount < dataElementCount) {
         // Create a new p element for the timestamp
         const timestampElement = document.createElement('p');
         timestampElement.id = "timestamp";
-        timestampElement.textContent = `${messageData.timestamp}`;
+
+        const date = new Date(messageData.timestamp);
+
+        // Extract the date, month, year, and time
+        const day = date.getDate();
+        const month = date.getMonth() + 1; // getMonth() returns a zero-based month
+        const year = date.getFullYear();
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+
+        // Format the timestamp
+        const formattedTimestamp = `${day} thg ${month} ${year} - ${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
+
+        timestampElement.textContent = `${formattedTimestamp}`;
 
         // Append the timestampElement to the chatBox
         chatBox.appendChild(timestampElement);
