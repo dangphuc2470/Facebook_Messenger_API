@@ -145,7 +145,7 @@ public void putAdvisor(String advisorId, String name, String status) throws Exec
 		{
 			allMessages.put(entry.getKey(), entry.getValue());
 		}
-		Logger.getGlobal().info("All messages: " + allMessages);
+		//Logger.getGlobal().info("All messages: " + allMessages);
 		return allMessages;
 	}
 }

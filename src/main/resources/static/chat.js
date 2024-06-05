@@ -1,35 +1,80 @@
 document.getElementById('chat-send').addEventListener('click', function () {
-    console.log('Send:', document.getElementById('chat-input').value);
-    var chatInput = document.getElementById('chat-input');
-    var chatMessages = document.getElementById('chat-messages');
+    // Assume you have the message data
+    const chatInput = document.getElementById('chat-input');
+    messageData = {
+        senderID: '25240652615526181',
+        messageText: chatInput.value,
+        timestamp: new Date().getTime()
+    };
+    console.log('Send:', messageData.messageText);
 
-    if (chatInput.value.trim() !== '') {
-        var newMessage = document.createElement('p');
-        newMessage.textContent = "Send: " + chatInput.value;
-        chatMessages.appendChild(newMessage);
+    const chatBox = document.getElementById('chat-messages');
 
-        // Send the message to the Spring Boot application
-        fetch('/send-message', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                message: chatInput.value
-            }),
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+    // Create a new div element with class "row-mess-send"
+    const rowElement = document.createElement('div');
+    rowElement.className = 'row-mess-send';
+    rowElement.setAttribute('data-timestamp', messageData.timestamp);
 
-        // Clear the input field and refocus it for the next message
-        chatInput.value = '';
-        chatInput.focus();
-    }
+    // Create a new span for the message text
+    const messageSpan = document.createElement('span');
+    messageSpan.id = "right-span";
+    messageSpan.style.textAlign = 'right';
+    messageSpan.style.backgroundColor = 'rgb(211, 227, 253)';
+
+    // Create a new p element for the message text and append it to messageSpan
+    const messageTextElement = document.createElement('p');
+    messageTextElement.textContent = messageData.messageText;
+    messageSpan.appendChild(messageTextElement);
+
+    // Append messageSpan to the rowElement
+    rowElement.appendChild(messageSpan);
+
+    // Append the rowElement to the chatBox
+    chatBox.appendChild(rowElement);
+
+    // Create a new p element for the timestamp
+    const timestampElement = document.createElement('p');
+    timestampElement.id = "timestamp-right";
+    const formattedTimestamp = formatTimestamp(messageData.timestamp);
+    timestampElement.textContent = `${formattedTimestamp}`;
+
+    // Append the timestampElement to the chatBox
+    chatBox.appendChild(timestampElement);
+
+    chatInput.value = '';
+    chatInput.focus();
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // var chatInput = document.getElementById('chat-input');
+    // var chatMessages = document.getElementById('chat-messages');
+
+    // if (chatInput.value.trim() !== '') {
+    //     var newMessage = document.createElement('p');
+    //     newMessage.textContent = "Send: " + chatInput.value;
+    //     chatMessages.appendChild(newMessage);
+
+    //     // Send the message to the Spring Boot application
+    //     fetch('/send-message', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({
+    //             message: chatInput.value
+    //         }),
+    //     })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             console.log('Success:', data);
+    //         })
+    //         .catch((error) => {
+    //             console.error('Error:', error);
+    //         });
+
+    //     // Clear the input field and refocus it for the next message
+    //     chatInput.value = '';
+    //     chatInput.focus();
+    // }
 });
 
 document.getElementById('chat-input').addEventListener('keypress', function (e) {
@@ -113,84 +158,75 @@ async function fetchMessages() {
         console.log('dataElementCount:', dataElementCount);
 
 
-if (chatBoxElementCount < dataElementCount) {
-    const keys = Object.keys(data);
-    for (let i = chatBoxElementCount; i < dataElementCount; i++) {
-        const messageData = data[keys[i]];
+        if (chatBoxElementCount < dataElementCount) {
+            const keys = Object.keys(data);
+            for (let i = chatBoxElementCount; i < dataElementCount; i++) {
+                const messageData = data[keys[i]];
 
-        // Create a new p element for the sender's ID
-        const idElement = document.createElement('p');
-        idElement.id = "id";
-        // Todo: Remove hardcode
-        idElement.textContent = "Phúc Đặng";
+                // Create a new p element for the sender's ID
+                const idElement = document.createElement('p');
+                idElement.id = "id";
+                // Todo: Remove hardcode
+                idElement.textContent = "Phúc Đặng";
 
-        // Append the idElement to the chatBox
-        chatBox.appendChild(idElement);
+                // Append the idElement to the chatBox
+                chatBox.appendChild(idElement);
 
-        // Create a new div element with class "row-mess"
-        const rowElement = document.createElement('div');
-        rowElement.className = 'row-mess';
-        // Convert the timestamp to a human-readable format
-       
-        rowElement.setAttribute('data-timestamp', messageData.timestamp);
+                // Create a new div element with class "row-mess"
+                const rowElement = document.createElement('div');
+                rowElement.className = 'row-mess';
+                // Convert the timestamp to a human-readable format
 
-        // Create a new div for the image
-        const imageDiv = document.createElement('div');
+                rowElement.setAttribute('data-timestamp', messageData.timestamp);
 
-        // Create a new img element and append it to imageDiv
-        const imageElement = document.createElement('img');
-        imageElement.src = 'avatar3.jpg'; // Replace with the actual path to your image
-        imageElement.alt = 'Image description'; // Replace with a suitable alt text
-        imageDiv.appendChild(imageElement);
+                // Create a new div for the image
+                const imageDiv = document.createElement('div');
 
-        // Append imageDiv to the rowElement
-        rowElement.appendChild(imageDiv);
+                // Create a new img element and append it to imageDiv
+                const imageElement = document.createElement('img');
+                imageElement.src = 'avatar3.jpg'; // Replace with the actual path to your image
+                imageElement.alt = 'Image description'; // Replace with a suitable alt text
+                imageDiv.appendChild(imageElement);
 
-        // Create a new span for the message text
-        const messageSpan = document.createElement('span');
+                // Append imageDiv to the rowElement
+                rowElement.appendChild(imageDiv);
 
-        // Create a new p element for the message text and append it to messageSpan
-        const messageTextElement = document.createElement('p');
-        messageTextElement.textContent = `${messageData.messageText}`;
-        messageSpan.appendChild(messageTextElement);
+                // Create a new span for the message text
+                const messageSpan = document.createElement('span');
+                messageSpan.id = "left-span";
 
-        // Todo: Remove hardcode
-        if (messageData.senderID === '25240652615526181') {
-            messageSpan.style.textAlign = 'right';
-            messageSpan.style.backgroundColor = '#D3E3FD';
-        } else {
-            messageSpan.style.textAlign = 'left';
-            messageSpan.style.backgroundColor = '#FAD8FD';
+                // Create a new p element for the message text and append it to messageSpan
+                const messageTextElement = document.createElement('p');
+                messageTextElement.textContent = `${messageData.messageText}`;
+                messageSpan.appendChild(messageTextElement);
+
+                // Todo: Remove hardcode
+                if (messageData.senderID === '25240652615526181') {
+                    messageSpan.style.textAlign = 'right';
+                    messageSpan.style.backgroundColor = '#D3E3FD';
+                } else {
+                    messageSpan.style.textAlign = 'left';
+                    messageSpan.style.backgroundColor = '#FAD8FD';
+                }
+
+                // Append messageSpan to the rowElement
+                rowElement.appendChild(messageSpan);
+
+                // Append the rowElement to the chatBox
+                chatBox.appendChild(rowElement);
+
+                // Create a new p element for the timestamp
+                const timestampElement = document.createElement('p');
+                timestampElement.id = "timestamp";
+
+                const formattedTimestamp = formatTimestamp(messageData.timestamp);
+
+                timestampElement.textContent = `${formattedTimestamp}`;
+
+                // Append the timestampElement to the chatBox
+                chatBox.appendChild(timestampElement);
+            }
         }
-
-        // Append messageSpan to the rowElement
-        rowElement.appendChild(messageSpan);
-
-        // Append the rowElement to the chatBox
-        chatBox.appendChild(rowElement);
-
-        // Create a new p element for the timestamp
-        const timestampElement = document.createElement('p');
-        timestampElement.id = "timestamp";
-
-        const date = new Date(messageData.timestamp);
-
-        // Extract the date, month, year, and time
-        const day = date.getDate();
-        const month = date.getMonth() + 1; // getMonth() returns a zero-based month
-        const year = date.getFullYear();
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-
-        // Format the timestamp
-        const formattedTimestamp = `${day} thg ${month} ${year} - ${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
-
-        timestampElement.textContent = `${formattedTimestamp}`;
-
-        // Append the timestampElement to the chatBox
-        chatBox.appendChild(timestampElement);
-    }
-}
 
         chatBox.scrollTop = chatBox.scrollHeight;
     } catch (error) {
@@ -205,4 +241,20 @@ source.onmessage = function (event) {
     console.log('Fetching messages begin');
     fetchMessages();
 };
-// Call fetchMessages when the page loads
+
+
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+
+    // Extract the date, month, year, and time
+    const day = date.getDate();
+    const month = date.getMonth() + 1; // getMonth() returns a zero-based month
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+
+    // Format the timestamp
+    const formattedTimestamp = `${day} thg ${month} ${year} - ${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
+
+    return formattedTimestamp;
+}

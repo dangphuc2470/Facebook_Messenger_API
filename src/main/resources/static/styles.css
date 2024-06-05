@@ -198,9 +198,26 @@ body {
     padding-left: 70px;
 }
 
-.message-container span{
+.message-container #timestamp-right
+{
+    margin-top: 1px;
+    direction: ltr;
+    color: #bbc1cc;
+    font-size: 12px;
+    text-align: right; 
+}
+
+.message-container #left-span{
     border-radius: 20px;
     height: auto;
     padding-left: 15px;
     padding-right: 15px;
+}
+
+.message-container #right-span{
+    border-radius: 20px;
+    height: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    float: right;
 }
