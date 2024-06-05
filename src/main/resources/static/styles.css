@@ -19,7 +19,7 @@ body {
 
 .sidebar {
     width: 200px;
-    height: 100vh;
+    height: 94vh;
     background-color: #f1f1f1;
     border-right: 1px solid #ddd;
     padding: 1rem;
@@ -79,12 +79,12 @@ body {
 }
 
 .column {
-    margin: 10px;
-
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 95vh;
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: auto;
 }
 
 .row {
@@ -108,6 +108,23 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+
+.message-container #chat-messages {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    height: calc(100% - 60px); 
+    overflow-y: auto;
+}
+
+.message-container #send-section {
+    padding-left: 10px;
+    padding-bottom: 10px;
+    display: inline-flex;
+    position: sticky;
+    bottom: 0;
+    background-color: inherit; /* To ensure the background color matches the parent */
 }
 
 .message-container input {
@@ -139,3 +156,50 @@ body {
     padding-bottom: 10px;
     display: inline-flex;
   }
+
+.profile-picture {
+    width: 50px;
+    height: 50px;
+    overflow: hidden;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 0 10px 0 0;
+  }
+  
+
+.profile-picture p {
+    margin-left: 10px; 
+    margin-top: 35px;
+    margin-bottom: 30px;
+    padding: 10px;
+}
+
+  .profile-picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures image fills the container */
+  }
+  
+
+.profile-picture p span {
+    padding: 15px;
+    background-color: #D3E3FD;
+    border-radius: 20px;
+}
+
+.row-mess img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+
+.row-mess {
+    display: flex;
+    flex-direction: row;
+    justify-content: 
+    width: 100%;
+    height: auto;
+}

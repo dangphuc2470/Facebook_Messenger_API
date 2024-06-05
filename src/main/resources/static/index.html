@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App UI</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="sidebar">
         <h2 class="sidebar-header">Contacts</h2>
@@ -18,27 +20,29 @@
             <span>Bảo Trân</span>
         </div>
 
-       
-        </div>
-        <div class="column">
-            <div class="row">
-                <div class="sidebar-contact">
-                    <img src="avatar3.jpg" alt="avatar">
-                    <span>Phúc Đặng</span>
-                </div>
-                <button id="see-more">
-                    <img src="more.jpg" alt="more">
+
+    </div>
+    <div class="column">
+        <div class="row">
+            <div class="sidebar-contact">
+                <img src="avatar3.jpg" alt="avatar">
+                <span>Phúc Đặng</span>
             </div>
-            <div class="message-container">
-                <div id="chat-messages"></div>
-                <div id="send-section">
-                    <input id="chat-input" type="text" placeholder="Nhập tin nhắn...">
-                    <button id="chat-send">
-                        <img src="send.svg" alt="Send">
-                    </button>
-                </div>
+            <button id="see-more">
+                <img src="more.jpg" alt="more">
+        </div>
+        <div class="message-container">
+            <div id="chat-messages">
+            </div>
+            <div id="send-section">
+                <input id="chat-input" type="text" placeholder="Nhập tin nhắn...">
+                <button id="chat-send">
+                    <img src="send.svg" alt="Send">
+                </button>
             </div>
         </div>
+    </div>
 </body>
 <script src="chat.js"></script>
+
 </html>

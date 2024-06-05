@@ -1,39 +1,38 @@
-document.getElementById('chat-send').addEventListener('click', function() {
-   console.log('Send:', document.getElementById('chat-input').value);
-   fetchMessages();
-    // var chatInput = document.getElementById('chat-input');
-    // var chatMessages = document.getElementById('chat-messages');
-    //
-    // if(chatInput.value.trim() !== '') {
-    //     var newMessage = document.createElement('p');
-    //     newMessage.textContent = "Send: " + chatInput.value;
-    //     chatMessages.appendChild(newMessage);
-    //
-    //     // Send the message to the Spring Boot application
-    //     fetch('/send-message', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify({
-    //             message: chatInput.value
-    //         }),
-    //     })
-    //     .then(response => response.json())
-    //     .then(data => {
-    //         console.log('Success:', data);
-    //     })
-    //     .catch((error) => {
-    //         console.error('Error:', error);
-    //     });
-    //
-    //     // Clear the input field and refocus it for the next message
-    //     chatInput.value = '';
-    //     chatInput.focus();
-    // }
+document.getElementById('chat-send').addEventListener('click', function () {
+    console.log('Send:', document.getElementById('chat-input').value);
+    var chatInput = document.getElementById('chat-input');
+    var chatMessages = document.getElementById('chat-messages');
+
+    if (chatInput.value.trim() !== '') {
+        var newMessage = document.createElement('p');
+        newMessage.textContent = "Send: " + chatInput.value;
+        chatMessages.appendChild(newMessage);
+
+        // Send the message to the Spring Boot application
+        fetch('/send-message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: chatInput.value
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+
+        // Clear the input field and refocus it for the next message
+        chatInput.value = '';
+        chatInput.focus();
+    }
 });
 
-document.getElementById('chat-input').addEventListener('keypress', function(e) {
+document.getElementById('chat-input').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
         document.getElementById('chat-send').click();
     }
@@ -45,7 +44,7 @@ function SendMessage(message) {
 
     var data = {
         "message": {
-            "text":message
+            "text": message
         },
         "messaging_type": "RESPONSE",
         "recipient": {
@@ -60,14 +59,15 @@ function SendMessage(message) {
         },
         body: JSON.stringify(data),
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
 }
+
 //
 // // Hàm này sẽ được gọi để lấy dữ liệu mới từ server
 // function fetchLatestMessage() {
@@ -100,22 +100,93 @@ function SendMessage(message) {
 
 async function fetchMessages() {
     try {
-        const response = await fetch('https://firmly-engaged-duckling.ngrok-free.app/get-messages'); // Replace with the actual endpoint to get messages
+        console.log('Fetching messages');
+        const response = await fetch('/get-messages'); // Replace with the actual endpoint to get messages
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         const chatBox = document.getElementById('chat-messages');
-        for (const conversationId in data) {
-            const message = data[conversationId];
-            const messageElement = document.createElement('p');
-            messageElement.textContent = `${message.advisorId}: ${message.messageText}`;
-            chatBox.appendChild(messageElement);
+        const chatBoxElementCount = chatBox.childElementCount / 3;
+        const dataElementCount = Object.keys(data).length;
+        console.log('chatBoxElementCount:', chatBoxElementCount);
+        console.log('dataElementCount:', dataElementCount);
+
+
+if (chatBoxElementCount < dataElementCount) {
+    const keys = Object.keys(data);
+    for (let i = chatBoxElementCount; i < dataElementCount; i++) {
+        const messageData = data[keys[i]];
+
+        // Create a new p element for the sender's ID
+        const idElement = document.createElement('p');
+        idElement.id = "id";
+        idElement.textContent = `${messageData.senderID}`;
+
+        // Append the idElement to the chatBox
+        chatBox.appendChild(idElement);
+
+        // Create a new div element with class "row-mess"
+        const rowElement = document.createElement('div');
+        rowElement.className = 'row-mess';
+        rowElement.setAttribute('data-timestamp', messageData.timestamp);
+
+        // Create a new div for the image
+        const imageDiv = document.createElement('div');
+
+        // Create a new img element and append it to imageDiv
+        const imageElement = document.createElement('img');
+        imageElement.src = 'avatar1.jpg'; // Replace with the actual path to your image
+        imageElement.alt = 'Image description'; // Replace with a suitable alt text
+        imageDiv.appendChild(imageElement);
+
+        // Append imageDiv to the rowElement
+        rowElement.appendChild(imageDiv);
+
+        // Create a new span for the message text
+        const messageSpan = document.createElement('span');
+
+        // Create a new p element for the message text and append it to messageSpan
+        const messageTextElement = document.createElement('p');
+        messageTextElement.textContent = `${messageData.messageText}`;
+        messageSpan.appendChild(messageTextElement);
+
+        // Apply conditional styling based on the sender's ID
+        if (messageData.senderID === '25240652615526181') {
+            messageSpan.style.textAlign = 'right';
+            messageSpan.style.backgroundColor = '#D3E3FD';
+        } else {
+            messageSpan.style.textAlign = 'left';
+            messageSpan.style.backgroundColor = '#FAD8FD';
         }
+
+        // Append messageSpan to the rowElement
+        rowElement.appendChild(messageSpan);
+
+        // Append the rowElement to the chatBox
+        chatBox.appendChild(rowElement);
+
+        // Create a new p element for the timestamp
+        const timestampElement = document.createElement('p');
+        timestampElement.id = "timestamp";
+        timestampElement.textContent = `${messageData.timestamp}`;
+
+        // Append the timestampElement to the chatBox
+        chatBox.appendChild(timestampElement);
+    }
+}
+
         chatBox.scrollTop = chatBox.scrollHeight;
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
+
+var source = new EventSource("/sse");
+
+source.onmessage = function (event) {
+    console.log('Fetching messages begin');
+    fetchMessages();
+};
 // Call fetchMessages when the page loads

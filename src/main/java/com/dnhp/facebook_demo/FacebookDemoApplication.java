@@ -1,7 +1,6 @@
 package com.dnhp.facebook_demo;
 
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
 import org.json.JSONObject;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-
+import javax.annotation.Nullable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -101,54 +100,14 @@ public class FacebookDemoApplication
 
         // Save the message to Firestore
         firestoreService.putReceivedMessage(senderId, messageText, timestamp, mid);
-
+        firestoreService.getMessages();
         return "OK";
     }
 
     @GetMapping("/get-messages")
     public Map<String, Map<String, Object>> getMessages() throws ExecutionException, InterruptedException
     {
-        Firestore db = FirestoreClient.getFirestore();
-        Map
-                <String,
-                        Map<String, Object>> allMessages = new HashMap<>();
-
-        // Get the sender document
-        DocumentSnapshot senderDoc = db.collection("message").document("25240652615526181").get().get();
-        if (senderDoc.exists())
-        {
-            // Get all conversation documents for this sender
-            List<QueryDocumentSnapshot> conversations = db.collection("message").document("25240652615526181").collection("1").get().get().getDocuments();
-            for (QueryDocumentSnapshot conversation : conversations)
-            {
-                String conversationId = conversation.getId();
-                if (conversationId.equals("conversation_metadata"))
-                {
-                    continue;
-                }
-                Map<String, Object> conversationMessages = new HashMap<>();
-
-                // Get all fields for this conversation
-                Map<String, Object> fields = conversation.getData();
-                String messageText = (String) fields.get("messageText");
-                Long timestamp = (Long) fields.get("timestamp");
-                String mid = (String) fields.get("mid");
-                String advisorId = (String) fields.get("advisorId");
-
-                // Add these fields to the conversation messages
-                conversationMessages.put("messageText", messageText);
-                conversationMessages.put("timestamp", timestamp);
-                conversationMessages.put("mid", mid);
-                conversationMessages.put("advisorId", advisorId);
-                allMessages.put(conversationId, conversationMessages);
-
-            }
-
-            // Add the conversation messages to the all messages
-
-        }
-        LOGGER.info(allMessages.toString());
-        return allMessages;
+        return firestoreService.getMessages();
     }
 
 
@@ -181,21 +140,40 @@ public class FacebookDemoApplication
         }
     }
 
-    @PostMapping("/send-message")
-    public ResponseEntity<String> sendMessage(@RequestBody Map<String, String> body)
-    {
-        String message = body.get("message");
-        if (message != null)
+    @GetMapping("/sse")
+    public SseEmitter handleSse() {
+        SseEmitter emitter = new SseEmitter();
+        DocumentReference docRef = firestoreService.db.collection("message").document("25240652615526181");
+        docRef.addSnapshotListener((snapshot, e) ->
         {
-            // Replace "userId" and "senderId" with the actual user ID and sender ID
-            //firestoreService.sendMessage("userId", message, "senderId");
-            LOGGER.info(message);
-            return ResponseEntity.ok("Message sent");
-        } else
-        {
-            return ResponseEntity.badRequest().body("No message found in request body");
-        }
+            LOGGER.info("Listening for changes");
+            if (e != null)
+            {
+                System.err.println("Listen failed: " + e);
+                return;
+            }
+
+            if (snapshot != null && snapshot.exists())
+            {
+                try
+                {
+                    // Send the update to the client-side
+                    emitter.send(SseEmitter.event().name("message").data(snapshot.getData()));
+                } catch (IOException ex)
+                {
+                    ex.printStackTrace();
+                }
+            } else
+            {
+                System.out.print("Current data: null");
+            }
+        });
+    
+        return emitter;
     }
+
+
+
 }
 
 

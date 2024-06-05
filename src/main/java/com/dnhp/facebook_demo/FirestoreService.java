@@ -8,17 +8,15 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 public class FirestoreService
 {
-	private final Firestore db;
+	public final Firestore db;
 
 	public FirestoreService()
 	{
@@ -32,6 +30,7 @@ public class FirestoreService
 		messageData.put("messageText", messageText);
 		messageData.put("timestamp", timestamp);
 		messageData.put("mid", mid);
+		messageData.put("senderID", senderId);
 
 		// Check if the senderId document exists
 		DocumentSnapshot senderDoc = db.collection("message").document(senderId).get().get();
@@ -49,7 +48,7 @@ public class FirestoreService
 		}
 		DocumentSnapshot conversationMetadataSnapshot = db.collection("message").document(senderId).collection(String.valueOf(count)).document("conversation_metadata").get().get();
 		Long lastMessageTimestamp = conversationMetadataSnapshot.getLong("lastMessageTimestamp");
-		if (lastMessageTimestamp != null && (timestamp - lastMessageTimestamp) > 60 * 60 * 1000) // New conversation if the last message was sent more than an hour ago
+		if (lastMessageTimestamp != null && (timestamp - lastMessageTimestamp) > 60 * 60 * 24 * 1000) // New conversation if the last message was sent more than 24 hour ago
 		{
 			count += 1;
 			senderDoc.getReference().update("conversationCount", count);
@@ -57,7 +56,7 @@ public class FirestoreService
 		}
 
 		// Save the message data to Firestore
-		db.collection("message").document(senderId).collection(String.valueOf(count)).document(mid).set(messageData);
+		db.collection("message").document(senderId).collection(String.valueOf(count)).document(String.valueOf(timestamp)).set(messageData);
 
 		// Update the conversationCount in the senderId document
 		Map<String, Object> senderData = new HashMap<>();
@@ -106,5 +105,47 @@ public void putAdvisor(String advisorId, String name, String status) throws Exec
 
 	public DocumentSnapshot getLastMessage(String userId) throws ExecutionException, InterruptedException {
 		return db.collection(userId).orderBy("timestamp", Query.Direction.DESCENDING).limit(1).get().get().getDocuments().get(0);
+	}
+
+	public Map<String, Map<String, Object>> getMessages() throws ExecutionException, InterruptedException
+	{
+		// Create a List and add elements to it in the order you want
+		List<Map.Entry<String, Map<String, Object>>> list = new ArrayList<>();
+		List<QueryDocumentSnapshot> conversations = db.collection("message").document("25240652615526181").collection("1").get().get().getDocuments();
+		for (QueryDocumentSnapshot conversation : conversations)
+		{
+			String conversationId = conversation.getId();
+			if (conversationId.equals("conversation_metadata"))
+			{
+				continue;
+			}
+			Map<String, Object> conversationMessages = new HashMap<>();
+
+			// Get all fields for this conversation
+			Map<String, Object> fields = conversation.getData();
+			String messageText = (String) fields.get("messageText");
+			Long timestamp = (Long) fields.get("timestamp");
+			String mid = (String) fields.get("mid");
+			String advisorId = (String) fields.get("advisorId");
+
+			// Add these fields to the conversation messages
+			conversationMessages.put("messageText", messageText);
+			conversationMessages.put("timestamp", timestamp);
+			conversationMessages.put("mid", mid);
+			conversationMessages.put("advisorId", advisorId);
+			conversationMessages.put("senderID", "25240652615526181");
+
+			// Add the conversation messages to the list
+			list.add(new AbstractMap.SimpleEntry<>(conversationId, conversationMessages));
+		}
+
+		// Convert the List to a Map
+		Map<String, Map<String, Object>> allMessages = new LinkedHashMap<>();
+		for (Map.Entry<String, Map<String, Object>> entry : list)
+		{
+			allMessages.put(entry.getKey(), entry.getValue());
+		}
+		Logger.getGlobal().info("All messages: " + allMessages);
+		return allMessages;
 	}
 }
