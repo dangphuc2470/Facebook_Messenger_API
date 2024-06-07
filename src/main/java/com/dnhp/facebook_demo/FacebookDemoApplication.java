@@ -44,28 +44,6 @@ public class FacebookDemoApplication
 
     @GetMapping("/test")
     public String test() {
-        String url = "https://graph.facebook.com/v18.0/me/messages?access_token=EABsLirhuG9kBO1kHgWn5AecLhNPksgVKogL72F4oB8sCZB9roIZC02Uxv4IngGG0SZCJzseTeBwaJSyKK43ZAkZC5oR3Tg3iu3VSJGxl1c3VhFAFbIrBzWi1Cqt4gljsbIPJpxyXJsXKGw1QIVNgunF2d755bOXyqQ9FjZA17dyb5yUZC1eusvn7RL2orzrbT4ZD";
-
-        String data = """
-            {
-                "message": {
-                    "text": "hi"
-                },
-                "messaging_type": "RESPONSE",
-                "recipient": {
-                    "id": "25240652615526181"
-                }
-            }
-            """;
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-
-        HttpEntity<String> request = new HttpEntity<>(data, headers);
-
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
-    
         return "Test";
     }
 
@@ -114,14 +92,14 @@ public class FacebookDemoApplication
         JSONObject jsonObject = new JSONObject(input);
 
         JSONObject firstEntry = jsonObject.getJSONArray("entry").getJSONObject(0);
-        long time = firstEntry.getLong("time");
-        String entryId = firstEntry.getString("id");
+        //long time = firstEntry.getLong("time");
+        //String entryId = firstEntry.getString("id");
 
         JSONObject firstMessaging = firstEntry.getJSONArray("messaging").getJSONObject(0);
         String senderId = firstMessaging.getJSONObject("sender").getString("id");
         String recipientId = firstMessaging.getJSONObject("recipient").getString("id");
         long timestamp = firstMessaging.getLong("timestamp");
-        String mid = firstMessaging.getJSONObject("message").getString("mid");
+        //String mid = firstMessaging.getJSONObject("message").getString("mid");
         String messageText = firstMessaging.getJSONObject("message").getString("text");
 
         // Save the message to Firestore
