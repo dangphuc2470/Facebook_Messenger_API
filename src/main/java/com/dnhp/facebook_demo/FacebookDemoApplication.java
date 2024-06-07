@@ -182,8 +182,12 @@ public Map<String, Map<String, Object>> getMessages(@PathVariable String senderI
         return emitter;
     }
 
-
+    @GetMapping("/get-conversation/{ID}")
+    public ResponseEntity<String> getConversation(@PathVariable String ID) {
+        String conversation = firestoreService.getConversation(ID);
+        return ResponseEntity.ok(conversation);
+    }
+    
 
 }
-
 

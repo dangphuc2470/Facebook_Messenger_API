@@ -1,6 +1,7 @@
 
 var conversationNum = "1";
 var conversationID = "25240652615526181";
+
 document.getElementById('chat-send').addEventListener('click', function () {
     // Assume you have the message data
     const chatInput = document.getElementById('chat-input');
@@ -154,3 +155,14 @@ function createMessageElement(direction, messageText, timestamp) {
     chatBox.appendChild(rowElement);
     chatBox.appendChild(timestampElement);
 }
+
+
+window.onload = function() {
+    fetch('/get-conversation')
+    .then(response => response.json())
+    .then(data => {
+        ConversationBox = document.getElementById('sidebar-header');
+
+        
+    });
+};

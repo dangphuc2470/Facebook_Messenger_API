@@ -194,4 +194,23 @@ public class FirestoreService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\":\"Failed to send message\"}");
         }
 	}
+
+	
+	// public Conversation getConversation(String conversationId) throws Exception {
+	// 	Query query = db.collection("message").document(conversationId).collection("messages")
+	// 			.orderBy("timestamp", Query.Direction.DESCENDING)
+	// 			.limit(1);
+	
+	// 	QuerySnapshot querySnapshot = query.get().get();
+	
+	// 	if (querySnapshot.isEmpty()) {
+	// 		throw new Exception("No messages in conversation");
+	// 	}
+	
+	// 	DocumentSnapshot lastMessageDocument = querySnapshot.getDocuments().get(0);
+	// 	Message lastMessage = lastMessageDocument.toObject(Message.class);
+	
+	// 	return new Conversation(conversationId, lastMessage);
+	// }
 }
+

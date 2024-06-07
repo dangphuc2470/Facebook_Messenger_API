@@ -18,14 +18,28 @@ body {
 }
 
 .sidebar {
-    width: 200px;
+    width: 500px;
     height: 94vh;
     background-color: #f1f1f1;
     border-right: 1px solid #ddd;
     padding: 1rem;
 }
 
-.sidebar-header {
+.badge {
+    margin-left: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    background-color: #FAD8FD;
+    color: black;
+    border-radius: 50%;
+    border: solid 1px #000000;
+}
+
+/* .sidebar-header {
     font-size: 1.2rem;
     margin-bottom: 1rem;
 }
@@ -45,7 +59,48 @@ body {
 
 .sidebar-contact span {
     font-weight: bold;
+} */
+.sidebar-contact {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
 }
+
+.sidebar-contact-top {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    padding: 10px;
+}
+
+.sidebar-contact img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.sidebar-contact-top img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+}
+.last-message {
+    color: #888;
+    font-size: 0.8em;
+}
+.timestamp {
+    color: #888;
+    font-size: 0.7em;
+}
+
 
 .message-container {
     flex: 1;
@@ -183,7 +238,7 @@ body {
     overflow-y: auto;
 }
 .row-mess-send{
-    
+
 }
 
 .row-mess-send img {
