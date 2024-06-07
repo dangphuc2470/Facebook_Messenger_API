@@ -108,7 +108,7 @@ public class FacebookDemoApplication
     }
 
     @PostMapping("/send-message/{recipientId}/{conversationNum}")
-    public ResponseEntity<String> sendMessage(@PathVariable String recipientId, @PathVariable String conversationNum, @RequestBody Map<String, Object> message) throws IOException, InterruptedException
+    public ResponseEntity<String> sendMessage(@PathVariable String recipientId, @PathVariable String conversationNum, @RequestBody Map<String, Object> message) throws IOException, InterruptedException, ExecutionException
     {
         return firestoreService.sendMessage(recipientId, message, conversationNum);
     }
@@ -182,11 +182,11 @@ public Map<String, Map<String, Object>> getMessages(@PathVariable String senderI
         return emitter;
     }
 
-    @GetMapping("/get-conversation/{ID}")
-    public ResponseEntity<String> getConversation(@PathVariable String ID) {
-        String conversation = firestoreService.getConversation(ID);
-        return ResponseEntity.ok(conversation);
-    }
+//    @GetMapping("/get-conversation/{ID}")
+//    public ResponseEntity<String> getConversation(@PathVariable String ID) {
+//        String conversation = firestoreService.getConversation(ID);
+//        return ResponseEntity.ok(conversation);
+//    }
     
 
 }

@@ -78,8 +78,8 @@ public class FirestoreService {
 		// // Get the metadata document
 		DocumentSnapshot metadataDoc = db.collection("message").document(senderId).collection(String.valueOf(count))
 				.document("conversation_metadata").get().get();
-		//
-		// Create or update the metadata
+
+				// Create or update the metadata
 		Map<String, Object> metadata = new HashMap<>();
 		if (metadataDoc.exists()) {
 			metadata = metadataDoc.getData();
@@ -151,7 +151,7 @@ public class FirestoreService {
 		return allMessages;
 	}
 
-	public ResponseEntity<String> sendMessage(String recipientId, Map<String, Object> message, String conversationNum) throws IOException, InterruptedException {
+	public ResponseEntity<String> sendMessage(String recipientId, Map<String, Object> message, String conversationNum) throws IOException, InterruptedException, ExecutionException {
 		// Create the message data
 		Map<String, Object> messageData = new HashMap<>();
 		messageData.put("messageText", message.get("messageText"));
@@ -162,6 +162,27 @@ public class FirestoreService {
 		// Save the message data to Firestore
 		db.collection("message").document(recipientId).collection(conversationNum)
 				.document(String.valueOf(message.get("timestamp"))).set(messageData);
+
+		// Get the metadata document
+		DocumentSnapshot metadataDoc = db.collection("message").document(recipientId).collection(conversationNum)
+		.document("conversation_metadata").get().get();
+
+		// Create or update the metadata
+		Map<String, Object> metadata = new HashMap<>();
+		if (metadataDoc.exists()) {
+			metadata = metadataDoc.getData();
+		} else {
+			metadata.put("firstMessageTimestamp", message.get("timestamp"));
+		}
+		metadata.put("lastMessage", message.get("messageText"));
+		metadata.put("lastMessageTimestamp", message.get("timestamp"));
+		// Todo: Remove hardcoding
+		metadata.put("advisorId", "AD1");
+
+		// Save the metadata to Firestore
+		db.collection("message").document(recipientId).collection(conversationNum).document("conversation_metadata")
+				.set(metadata);
+
 
 
 		// Post message to Facebook
