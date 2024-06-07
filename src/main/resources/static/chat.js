@@ -1,3 +1,6 @@
+
+var conversationNum = "1";
+var conversationID = "25240652615526181";
 document.getElementById('chat-send').addEventListener('click', function () {
     // Assume you have the message data
     const chatInput = document.getElementById('chat-input');
@@ -16,7 +19,7 @@ document.getElementById('chat-send').addEventListener('click', function () {
     //Toto remore hardcode
     const recipientId = '25240652615526181';
     // Send the message to the Spring Boot application
-    fetch(`/send-message/${recipientId}`, {
+    fetch(`/send-message/${recipientId}/${conversationNum}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -37,10 +40,10 @@ document.getElementById('chat-input').addEventListener('keypress', function (e) 
     }
 });
 
-async function fetchMessages() {
+async function fetchMessages(conversationID, conversationNum) {
     try {
         console.log('Fetching messages');
-        const response = await fetch('/get-messages/25240652615526181'); // Replace with the actual endpoint to get messages
+        const response = await fetch(`/get-messages/${conversationID}/${conversationNum}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -74,9 +77,9 @@ async function fetchMessages() {
 
 var source = new EventSource("/sse");
 
-source.onmessage = function (event) {
+source.onmessage = function () {
     console.log('Fetching messages begin');
-    fetchMessages();
+    fetchMessages(conversationID, conversationNum);
 };
 
 
@@ -91,9 +94,7 @@ function formatTimestamp(timestamp) {
     const minutes = date.getMinutes();
 
     // Format the timestamp
-    const formattedTimestamp = `${day} thg ${month} ${year} - ${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
-
-    return formattedTimestamp;
+    return `${day} thg ${month} ${year} - ${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
 }
 
 

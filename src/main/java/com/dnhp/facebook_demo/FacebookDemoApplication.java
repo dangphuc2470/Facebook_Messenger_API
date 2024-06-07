@@ -107,16 +107,17 @@ public class FacebookDemoApplication
         return "OK";
     }
 
-    @PostMapping("/send-message/{recipientId}")
-    public ResponseEntity<String> sendMessage(@PathVariable String recipientId, @RequestBody Map<String, Object> message) throws IOException, InterruptedException
+    @PostMapping("/send-message/{recipientId}/{conversationNum}")
+    public ResponseEntity<String> sendMessage(@PathVariable String recipientId, @PathVariable String conversationNum, @RequestBody Map<String, Object> message) throws IOException, InterruptedException
     {
-        return firestoreService.sendMessage(recipientId, message);
+        return firestoreService.sendMessage(recipientId, message, conversationNum);
     }
 
 
-    @GetMapping("/get-messages/{senderId}")
-public Map<String, Map<String, Object>> getMessages(@PathVariable String senderId) throws ExecutionException, InterruptedException {
-    return firestoreService.getMessages(senderId);
+    @GetMapping("/get-messages/{senderId}/{conversationNum}")
+public Map<String, Map<String, Object>> getMessages(@PathVariable String senderId, @PathVariable String conversationNum) throws ExecutionException, InterruptedException {
+        LOGGER.info("Getting messages for senderId: " + senderId + " and conversationNum: " + conversationNum);
+        return firestoreService.getMessages(senderId, conversationNum);
 }
 
 

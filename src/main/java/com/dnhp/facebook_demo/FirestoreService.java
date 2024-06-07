@@ -53,7 +53,7 @@ public class FirestoreService {
 		DocumentSnapshot conversationMetadataSnapshot = db.collection("message").document(senderId)
 				.collection(String.valueOf(count)).document("conversation_metadata").get().get();
 		Long lastMessageTimestamp = conversationMetadataSnapshot.getLong("lastMessageTimestamp");
-		if (lastMessageTimestamp != null && (timestamp - lastMessageTimestamp) > 60 * 60 * 24 * 1000) // New
+		if (lastMessageTimestamp != null && (timestamp - lastMessageTimestamp) > 10 * 1000) // New
 																										// conversation
 																										// if the last
 																										// message was
@@ -96,27 +96,26 @@ public class FirestoreService {
 
 	}
 
-	public void putAdvisor(String advisorId, String name, String status)
-			throws ExecutionException, InterruptedException {
-		// Create the advisor data
-		Map<String, Object> advisorData = new HashMap<>();
-		advisorData.put("name", name);
-		advisorData.put("status", status);
+//	public void putAdvisor(String advisorId, String name, String status)
+//			throws ExecutionException, InterruptedException {
+//		// Create the advisor data
+//		Map<String, Object> advisorData = new HashMap<>();
+//		advisorData.put("name", name);
+//		advisorData.put("status", status);
+//
+//		// Save the advisor data to Firestore
+//		db.collection("advisors").document(advisorId).set(advisorData);
+//	}
 
-		// Save the advisor data to Firestore
-		db.collection("advisors").document(advisorId).set(advisorData);
-	}
 
+	// public DocumentSnapshot getLastMessage(String userId) throws ExecutionException, InterruptedException {
+	// 	return db.collection(userId).orderBy("timestamp", Query.Direction.DESCENDING).limit(1).get().get()
+	// 			.getDocuments().get(0);
+	// }
 
-	public DocumentSnapshot getLastMessage(String userId) throws ExecutionException, InterruptedException {
-		return db.collection(userId).orderBy("timestamp", Query.Direction.DESCENDING).limit(1).get().get()
-				.getDocuments().get(0);
-	}
-
-	public Map<String, Map<String, Object>> getMessages(String userID) throws ExecutionException, InterruptedException {
-		// Create a List and add elements to it in the order you want
+	public Map<String, Map<String, Object>> getMessages(String userID, String conversationNum) throws ExecutionException, InterruptedException {
 		List<Map.Entry<String, Map<String, Object>>> list = new ArrayList<>();
-		List<QueryDocumentSnapshot> conversations = db.collection("message").document(userID).collection("1").get()
+		List<QueryDocumentSnapshot> conversations = db.collection("message").document(userID).collection(conversationNum).get()
 				.get().getDocuments();
 		for (QueryDocumentSnapshot conversation : conversations) {
 			String conversationId = conversation.getId();
@@ -152,7 +151,7 @@ public class FirestoreService {
 		return allMessages;
 	}
 
-	public ResponseEntity<String> sendMessage(String recipientId, Map<String, Object> message) throws IOException, InterruptedException {
+	public ResponseEntity<String> sendMessage(String recipientId, Map<String, Object> message, String conversationNum) throws IOException, InterruptedException {
 		// Create the message data
 		Map<String, Object> messageData = new HashMap<>();
 		messageData.put("messageText", message.get("messageText"));
@@ -161,7 +160,7 @@ public class FirestoreService {
 		messageData.put("recipientID", recipientId);
 
 		// Save the message data to Firestore
-		db.collection("message").document(recipientId).collection("1")
+		db.collection("message").document(recipientId).collection(conversationNum)
 				.document(String.valueOf(message.get("timestamp"))).set(messageData);
 
 
