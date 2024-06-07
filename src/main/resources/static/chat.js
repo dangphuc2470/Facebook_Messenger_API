@@ -156,13 +156,52 @@ function createMessageElement(direction, messageText, timestamp) {
     chatBox.appendChild(timestampElement);
 }
 
-
-window.onload = function() {
-    fetch('/get-conversation')
+document.addEventListener("DOMContentLoaded", function() {
+    fetch('/get-conversation/' + conversationID)
     .then(response => response.json())
     .then(data => {
-        ConversationBox = document.getElementById('sidebar-header');
-
+        const ConversationBox = document.getElementById('.sidebar');
         
+        data.forEach(conversation => {
+            console.log(conversation);
+
+            const conversationElement = document.createElement('div');
+            conversationElement.className = 'sidebar-contact';
+
+            const imgElement = document.createElement('img');
+            imgElement.src = 'avatar3.jpg';
+            imgElement.alt = 'avatar';
+            conversationElement.appendChild(imgElement);
+
+            const infoElement = document.createElement('div');
+            infoElement.className = 'contact-info';
+            conversationElement.appendChild(infoElement);
+
+            const rowElement = document.createElement('div');
+            rowElement.className = 'row';
+            infoElement.appendChild(rowElement);
+
+            const nameElement = document.createElement('span');
+            nameElement.textContent = conversation.advisorId || 'Unknown';
+            rowElement.appendChild(nameElement);
+
+            const badgeElement = document.createElement('span');
+            badgeElement.className = 'badge';
+            badgeElement.textContent = '1';
+            rowElement.appendChild(badgeElement);
+
+            const lastMessageElement = document.createElement('span');
+            lastMessageElement.className = 'last-message';
+            lastMessageElement.textContent = conversation.lastMessage;
+            infoElement.appendChild(lastMessageElement);
+
+            const timestampElement = document.createElement('span');
+            timestampElement.className = 'timestamp';
+            const date = new Date(conversation.lastMessageTimestamp);
+            timestampElement.textContent = date.toLocaleTimeString();
+            infoElement.appendChild(timestampElement);
+
+            ConversationBox.appendChild(conversationElement);
+        });
     });
-};
+});

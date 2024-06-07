@@ -115,7 +115,7 @@ public class FacebookDemoApplication
 
 
     @GetMapping("/get-messages/{senderId}/{conversationNum}")
-public Map<String, Map<String, Object>> getMessages(@PathVariable String senderId, @PathVariable String conversationNum) throws ExecutionException, InterruptedException {
+    public Map<String, Map<String, Object>> getMessages(@PathVariable String senderId, @PathVariable String conversationNum) throws ExecutionException, InterruptedException {
         LOGGER.info("Getting messages for senderId: " + senderId + " and conversationNum: " + conversationNum);
         return firestoreService.getMessages(senderId, conversationNum);
 }
@@ -182,11 +182,11 @@ public Map<String, Map<String, Object>> getMessages(@PathVariable String senderI
         return emitter;
     }
 
-//    @GetMapping("/get-conversation/{ID}")
-//    public ResponseEntity<String> getConversation(@PathVariable String ID) {
-//        String conversation = firestoreService.getConversation(ID);
-//        return ResponseEntity.ok(conversation);
-//    }
+   @GetMapping("/get-conversation/{ID}")
+   public List<Map<String, Object>> getConversation(@PathVariable String ID) throws Exception {
+           
+        return firestoreService.getConversation(ID);
+   }
     
 
 }

@@ -217,21 +217,31 @@ public class FirestoreService {
 	}
 
 	
-	// public Conversation getConversation(String conversationId) throws Exception {
-	// 	Query query = db.collection("message").document(conversationId).collection("messages")
-	// 			.orderBy("timestamp", Query.Direction.DESCENDING)
-	// 			.limit(1);
+	public List<Map<String, Object>> getConversation(String conversationId) throws Exception {
+		var count = 0;
+		DocumentSnapshot documentSnapshot = db.collection("message").document(conversationId).get().get();
+		if (documentSnapshot.exists()) {
+			Long conversationCount = documentSnapshot.getLong("conversationCount");
+			if (conversationCount != null) {
+				count = conversationCount.intValue();
+			} else {
+				throw new IllegalStateException("conversationCount is null");
+			}
+		} else {
+			throw new IllegalStateException("Document does not exist");
+		}
 	
-	// 	QuerySnapshot querySnapshot = query.get().get();
+		List<Map<String, Object>> conversations = new ArrayList<>();
+		for (int i = 1; i <= count; i++) {
+			DocumentReference docRef = db.collection("message").document(conversationId).collection(String.valueOf(i)).document("conversation_metadata");
+			DocumentSnapshot docSnapshot = docRef.get().get();
+			if (docSnapshot.exists()) {
+				conversations.add(docSnapshot.getData());
+			}
+		}
+		
+		return conversations;
+	}
 	
-	// 	if (querySnapshot.isEmpty()) {
-	// 		throw new Exception("No messages in conversation");
-	// 	}
-	
-	// 	DocumentSnapshot lastMessageDocument = querySnapshot.getDocuments().get(0);
-	// 	Message lastMessage = lastMessageDocument.toObject(Message.class);
-	
-	// 	return new Conversation(conversationId, lastMessage);
-	// }
 }
 
