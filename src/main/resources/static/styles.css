@@ -95,7 +95,7 @@ body {
     height: auto;
 }
 
-#see-more{
+#see-more {
     border: none;
     background-color: transparent;
 }
@@ -114,7 +114,7 @@ body {
     display: flex;
     flex-direction: column;
     padding: 10px;
-    height: calc(100% - 60px); 
+    height: calc(100% - 60px);
     overflow-y: auto;
 }
 
@@ -124,7 +124,8 @@ body {
     display: inline-flex;
     position: sticky;
     bottom: 0;
-    background-color: inherit; /* To ensure the background color matches the parent */
+    background-color: inherit;
+    /* To ensure the background color matches the parent */
 }
 
 .message-container input {
@@ -147,7 +148,7 @@ body {
     background-color: white;
 }
 
-.message-container button:hover{
+.message-container button:hover {
     background-color: #91bdf4;
 }
 
@@ -155,7 +156,7 @@ body {
     padding-left: 10px;
     padding-bottom: 10px;
     display: inline-flex;
-  }
+}
 
 
 
@@ -178,19 +179,28 @@ body {
     display: flex;
     flex-direction: column;
     padding: 10px;
-    height: calc(100% - 60px); 
+    height: calc(100% - 60px);
     overflow-y: auto;
 }
+.row-mess-send{
+    
+}
 
-.message-container #id
-{
+.row-mess-send img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+
+
+.message-container #id {
     color: #65676B;
     font-size: 14px;
     margin-left: -8px;
 }
 
-.message-container #timestamp
-{
+.message-container #timestamp {
     margin-top: 1px;
     direction: ltr;
     color: #bbc1cc;
@@ -198,26 +208,31 @@ body {
     padding-left: 70px;
 }
 
-.message-container #timestamp-right
-{
+.message-container #timestamp-right {
     margin-top: 1px;
     direction: ltr;
     color: #bbc1cc;
     font-size: 12px;
-    text-align: right; 
+    text-align: right;
 }
 
-.message-container #left-span{
+.message-container #left-span {
     border-radius: 20px;
     height: auto;
     padding-left: 15px;
     padding-right: 15px;
 }
 
-.message-container #right-span{
+.message-container #right-span {
     border-radius: 20px;
     height: auto;
     padding-left: 15px;
     padding-right: 15px;
     float: right;
+}
+
+#invisible {
+    position: absolute;
+    visibility: hidden;
+    height: 0;
 }

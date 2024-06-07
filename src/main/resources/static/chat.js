@@ -2,13 +2,17 @@ document.getElementById('chat-send').addEventListener('click', function () {
     // Assume you have the message data
     const chatInput = document.getElementById('chat-input');
     messageData = {
-        senderID: '25240652615526181',
+        senderID: '245010088693541',
         messageText: chatInput.value,
-        timestamp: new Date().getTime()
+        timestamp: new Date().getTime(),
     };
     console.log('Send:', messageData.messageText);
 
     const chatBox = document.getElementById('chat-messages');
+
+    const invisibleP = document.createElement('p');
+    invisibleP.id = "invisible";
+    chatBox.appendChild(invisibleP);
 
     // Create a new div element with class "row-mess-send"
     const rowElement = document.createElement('div');
@@ -25,6 +29,7 @@ document.getElementById('chat-send').addEventListener('click', function () {
     const messageTextElement = document.createElement('p');
     messageTextElement.textContent = messageData.messageText;
     messageSpan.appendChild(messageTextElement);
+
 
     // Append messageSpan to the rowElement
     rowElement.appendChild(messageSpan);
@@ -45,6 +50,22 @@ document.getElementById('chat-send').addEventListener('click', function () {
     chatInput.focus();
     chatBox.scrollTop = chatBox.scrollHeight;
 
+
+    //Toto remore hardcode
+    const recipientId = '25240652615526181';
+    // Send the message to the Spring Boot application
+    fetch(`/send-message/${recipientId}`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(messageData),
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch((error) => {
+    console.error('Error:', error);
+});
     // var chatInput = document.getElementById('chat-input');
     // var chatMessages = document.getElementById('chat-messages');
 
@@ -146,7 +167,7 @@ function SendMessage(message) {
 async function fetchMessages() {
     try {
         console.log('Fetching messages');
-        const response = await fetch('/get-messages'); // Replace with the actual endpoint to get messages
+        const response = await fetch('/get-messages/25240652615526181'); // Replace with the actual endpoint to get messages
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -162,6 +183,11 @@ async function fetchMessages() {
             const keys = Object.keys(data);
             for (let i = chatBoxElementCount; i < dataElementCount; i++) {
                 const messageData = data[keys[i]];
+
+                if (messageData.senderID === '25240652615526181')
+                    {
+                        
+                    }
 
                 // Create a new p element for the sender's ID
                 const idElement = document.createElement('p');
@@ -190,6 +216,8 @@ async function fetchMessages() {
 
                 // Append imageDiv to the rowElement
                 rowElement.appendChild(imageDiv);
+                const timestampElement = document.createElement('p');
+                timestampElement.id = "timestamp";
 
                 // Create a new span for the message text
                 const messageSpan = document.createElement('span');
@@ -202,11 +230,17 @@ async function fetchMessages() {
 
                 // Todo: Remove hardcode
                 if (messageData.senderID === '25240652615526181') {
-                    messageSpan.style.textAlign = 'right';
-                    messageSpan.style.backgroundColor = '#D3E3FD';
-                } else {
                     messageSpan.style.textAlign = 'left';
+                    messageSpan.id = "left-span";
+                    messageSpan.style.backgroundColor = '#D3E3FD';
+                    console.log('left');
+                } else {
+                    messageSpan.style.textAlign = 'right';
+                    messageSpan.id = "right-span";
                     messageSpan.style.backgroundColor = '#FAD8FD';
+                    rowElement.className = 'row-mess-send';
+                    timestampElement.id = "timestamp-right";
+                    console.log('right');
                 }
 
                 // Append messageSpan to the rowElement
@@ -216,9 +250,7 @@ async function fetchMessages() {
                 chatBox.appendChild(rowElement);
 
                 // Create a new p element for the timestamp
-                const timestampElement = document.createElement('p');
-                timestampElement.id = "timestamp";
-
+               
                 const formattedTimestamp = formatTimestamp(messageData.timestamp);
 
                 timestampElement.textContent = `${formattedTimestamp}`;

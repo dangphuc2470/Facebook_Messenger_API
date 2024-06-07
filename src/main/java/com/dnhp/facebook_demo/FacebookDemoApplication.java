@@ -24,6 +24,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @RestController
@@ -38,8 +43,29 @@ public class FacebookDemoApplication
     }
 
     @GetMapping("/test")
-    public String test()
-    {
+    public String test() {
+        String url = "https://graph.facebook.com/v18.0/me/messages?access_token=EABsLirhuG9kBO1kHgWn5AecLhNPksgVKogL72F4oB8sCZB9roIZC02Uxv4IngGG0SZCJzseTeBwaJSyKK43ZAkZC5oR3Tg3iu3VSJGxl1c3VhFAFbIrBzWi1Cqt4gljsbIPJpxyXJsXKGw1QIVNgunF2d755bOXyqQ9FjZA17dyb5yUZC1eusvn7RL2orzrbT4ZD";
+
+        String data = """
+            {
+                "message": {
+                    "text": "hi"
+                },
+                "messaging_type": "RESPONSE",
+                "recipient": {
+                    "id": "25240652615526181"
+                }
+            }
+            """;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+
+        HttpEntity<String> request = new HttpEntity<>(data, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+    
         return "Test";
     }
 
@@ -99,16 +125,21 @@ public class FacebookDemoApplication
         String messageText = firstMessaging.getJSONObject("message").getString("text");
 
         // Save the message to Firestore
-        firestoreService.putReceivedMessage(senderId, messageText, timestamp, mid);
-        firestoreService.getMessages();
+        firestoreService.putReceivedMessage(senderId, recipientId, messageText, timestamp);
         return "OK";
     }
 
-    @GetMapping("/get-messages")
-    public Map<String, Map<String, Object>> getMessages() throws ExecutionException, InterruptedException
+    @PostMapping("/send-message/{recipientId}")
+    public ResponseEntity<String> sendMessage(@PathVariable String recipientId, @RequestBody Map<String, Object> message) throws IOException, InterruptedException
     {
-        return firestoreService.getMessages();
+        return firestoreService.sendMessage(recipientId, message);
     }
+
+
+    @GetMapping("/get-messages/{senderId}")
+public Map<String, Map<String, Object>> getMessages(@PathVariable String senderId) throws ExecutionException, InterruptedException {
+    return firestoreService.getMessages(senderId);
+}
 
 
     @GetMapping("/hello")
