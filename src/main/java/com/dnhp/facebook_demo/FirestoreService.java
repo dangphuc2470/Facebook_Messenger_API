@@ -88,7 +88,9 @@ public class FirestoreService {
 		}
 		metadata.put("lastMessage", messageText);
 		metadata.put("lastMessageTimestamp", timestamp);
-		metadata.put("advisorId", null);
+		metadata.put("lastSenderID", senderId);
+		metadata.put("conversationID", senderId);
+
 
 		// Save the metadata to Firestore
 		db.collection("message").document(senderId).collection(String.valueOf(count)).document("conversation_metadata")
@@ -176,6 +178,8 @@ public class FirestoreService {
 		}
 		metadata.put("lastMessage", message.get("messageText"));
 		metadata.put("lastMessageTimestamp", message.get("timestamp"));
+		metadata.put("lastSenderID", message.get("senderID"));
+		metadata.put("conversationID", message.get("recipientID"));
 		// Todo: Remove hardcoding
 		metadata.put("advisorId", "AD1");
 
@@ -236,10 +240,32 @@ public class FirestoreService {
 			DocumentReference docRef = db.collection("message").document(conversationId).collection(String.valueOf(i)).document("conversation_metadata");
 			DocumentSnapshot docSnapshot = docRef.get().get();
 			if (docSnapshot.exists()) {
-				conversations.add(docSnapshot.getData());
+				Map<String, Object> conversationData = docSnapshot.getData();
+				conversationData.put("conversationNum", String.valueOf(i)); 
+				conversations.add(conversationData);
 			}
 		}
-		
+
+		conversations.sort((conversation1, conversation2) -> {
+			Long timestamp1 = (Long) conversation1.get("lastMessageTimestamp");
+			Long timestamp2 = (Long) conversation2.get("lastMessageTimestamp");
+	
+			// Handle potential null values
+			if (timestamp1 == null && timestamp2 == null) {
+				return 0;
+			} else if (timestamp1 == null) {
+				return 1;
+			} else if (timestamp2 == null) {
+				return -1;
+			}
+	
+			// Compare timestamps
+			return timestamp1.compareTo(timestamp2);
+		});
+
+
+		Logger.getGlobal().info("Conversations: " + conversations);
+
 		return conversations;
 	}
 	

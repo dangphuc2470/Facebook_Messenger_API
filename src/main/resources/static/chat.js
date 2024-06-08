@@ -1,12 +1,24 @@
 
-var conversationNum = "1";
+var conversationNum = "2";
 var conversationID = "25240652615526181";
+var currentUserID = "245010088693541";
+var clientName = "Phúc Đặng";
+var clientPicture = "avatar3.jpg";
+var selectedConversation = document.createElement('div');
+var contacts = document.getElementsByClassName('sidebar-contact');
+
+// Function to remove selected class from all contacts
+function removeSelectedClass() {
+    for (var i = 0; i < contacts.length; i++) {
+        contacts[i].classList.remove('sidebar-contact-selected');
+    }
+}
 
 document.getElementById('chat-send').addEventListener('click', function () {
     // Assume you have the message data
     const chatInput = document.getElementById('chat-input');
     messageData = {
-        senderID: '245010088693541',
+        senderID: currentUserID,
         messageText: chatInput.value,
         timestamp: new Date().getTime(),
     };
@@ -17,10 +29,8 @@ document.getElementById('chat-send').addEventListener('click', function () {
     chatBox.scrollTop = chatBox.scrollHeight;
 
 
-    //Toto remore hardcode
-    const recipientId = '25240652615526181';
     // Send the message to the Spring Boot application
-    fetch(`/send-message/${recipientId}/${conversationNum}`, {
+    fetch(`/send-message/${conversationID}/${conversationNum}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -60,13 +70,13 @@ async function fetchMessages(conversationID, conversationNum) {
             for (let i = chatBoxElementCount; i < dataElementCount; i++) {
                 const messageData = data[keys[i]];
 
-                if (messageData.senderID === '25240652615526181') {
+                if (messageData.senderID != currentUserID) {
                     createMessageElement('left', messageData.messageText, messageData.timestamp);
                 } else {
                     createMessageElement('right', messageData.messageText, messageData.timestamp);
-                   
+
+                }
             }
-        }
         }
 
         chatBox.scrollTop = chatBox.scrollHeight;
@@ -117,12 +127,12 @@ function createMessageElement(direction, messageText, timestamp) {
         const idElement = document.createElement('p');
         idElement.id = "id";
         // Todo: Remove hardcode
-        idElement.textContent = "Phúc Đặng";
+        idElement.textContent = clientName;
 
         const imageDiv = document.createElement('div');
 
         const imageElement = document.createElement('img');
-        imageElement.src = 'avatar3.jpg';
+        imageElement.src = clientPicture;
 
         rowElement.className = 'row-mess';
 
@@ -156,52 +166,90 @@ function createMessageElement(direction, messageText, timestamp) {
     chatBox.appendChild(timestampElement);
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     fetch('/get-conversation/' + conversationID)
-    .then(response => response.json())
-    .then(data => {
-        const ConversationBox = document.getElementById('.sidebar');
-        
-        data.forEach(conversation => {
-            console.log(conversation);
+        .then(response => response.json())
+        .then(data => {
+            const conversationBox = document.getElementById('.sidebar');
 
-            const conversationElement = document.createElement('div');
-            conversationElement.className = 'sidebar-contact';
+           
 
-            const imgElement = document.createElement('img');
-            imgElement.src = 'avatar3.jpg';
-            imgElement.alt = 'avatar';
-            conversationElement.appendChild(imgElement);
 
-            const infoElement = document.createElement('div');
-            infoElement.className = 'contact-info';
-            conversationElement.appendChild(infoElement);
+            data.forEach(conversation => {
+                const conversationElement = document.createElement('div');
+                conversationElement.className = 'sidebar-contact';
 
-            const rowElement = document.createElement('div');
-            rowElement.className = 'row';
-            infoElement.appendChild(rowElement);
+                conversationElement.addEventListener('click', function () {
+                   conversationID = conversation.conversationID;
+                    conversationNum = conversation.conversationNum;
+                    fetchMessages(conversationID, conversationNum);
+                    removeSelectedClass(); // Remove selected class from all contacts
+                    this.classList.add('sidebar-contact-selected'); // Add selected class to clicked contact
+                    document.getElementById('chat-messages').innerHTML = '';
+                    fetchMessages(conversationID, conversationNum);
+                }
+                );
 
-            const nameElement = document.createElement('span');
-            nameElement.textContent = conversation.advisorId || 'Unknown';
-            rowElement.appendChild(nameElement);
+                
 
-            const badgeElement = document.createElement('span');
-            badgeElement.className = 'badge';
-            badgeElement.textContent = '1';
-            rowElement.appendChild(badgeElement);
+                const imgElement = document.createElement('img');
+                imgElement.src = clientPicture;
+                imgElement.alt = 'avatar';
+                conversationElement.appendChild(imgElement);
 
-            const lastMessageElement = document.createElement('span');
-            lastMessageElement.className = 'last-message';
-            lastMessageElement.textContent = conversation.lastMessage;
-            infoElement.appendChild(lastMessageElement);
+                const infoElement = document.createElement('div');
+                infoElement.className = 'contact-info';
+                conversationElement.appendChild(infoElement);
 
-            const timestampElement = document.createElement('span');
-            timestampElement.className = 'timestamp';
-            const date = new Date(conversation.lastMessageTimestamp);
-            timestampElement.textContent = date.toLocaleTimeString();
-            infoElement.appendChild(timestampElement);
+                const rowElement = document.createElement('div');
+                rowElement.className = 'row';
+                infoElement.appendChild(rowElement);
 
-            ConversationBox.appendChild(conversationElement);
+                const nameElement = document.createElement('span');
+                nameElement.className = 'span-bold';
+                nameElement.textContent = clientName + " | " + (conversation.advisorId || 'N/A');
+                rowElement.appendChild(nameElement);
+
+                const lastMessageElement = document.createElement('span');
+                lastMessageElement.className = 'last-message';
+                lastMessageElement.textContent = conversation.lastMessage;
+
+                if (conversation.lastSenderID != currentUserID) {
+                    const badgeElement = document.createElement('span');
+                    badgeElement.className = 'badge';
+                    rowElement.appendChild(badgeElement);
+                    lastMessageElement.style.fontWeight = 'bold';
+                    lastMessageElement.style.color = 'black';
+                }
+                else {
+                    lastMessageElement.textContent = "Bạn: " + lastMessageElement.textContent;
+                }
+
+                infoElement.appendChild(lastMessageElement);
+
+
+                const timestampElement = document.createElement('span');
+                timestampElement.className = 'timestamp';
+                timestampElement.textContent = formatTimestamp(conversation.lastMessageTimestamp);
+                infoElement.appendChild(timestampElement);
+
+                const badgeRightElement = document.createElement('span');
+                badgeRightElement.className = 'badge-right';
+                badgeRightElement.textContent = conversation.conversationNum;
+                conversationElement.appendChild(badgeRightElement);
+                conversationBox.appendChild(conversationElement);
+
+                //conversationElement.className = 'sidebar-contact-selected';
+
+            
+                //selectedConversation.className = 'sidebar-contact'; // Reset the class name of the previously selected conversation
+
+                //selectedConversation = conversationElement;
+            });
+        })
+        .then(() => {
+            contacts[0].click();
         });
-    });
 });
+
+

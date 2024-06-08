@@ -26,6 +26,18 @@ body {
 }
 
 .badge {
+    margin-top: 2px;
+    margin-left: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 15px;
+    height: 15px;
+    background-color: #ff0909;
+    border-radius: 50%;
+}
+
+.badge-right {
     margin-left: 10px;
     display: flex;
     justify-content: center;
@@ -37,6 +49,10 @@ body {
     color: black;
     border-radius: 50%;
     border: solid 1px #000000;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
 }
 
 /* .sidebar-header {
@@ -65,7 +81,18 @@ body {
     align-items: center;
     padding: 10px;
     border-bottom: 1px solid #ddd;
+    position: relative;
 }
+
+.sidebar-contact-selected {
+    display: flex;
+    align-items: center;
+    background-color: #000000;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+}
+
 
 .sidebar-contact-top {
     display: flex;
@@ -75,6 +102,13 @@ body {
 }
 
 .sidebar-contact img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.sidebar-contact-selected img {
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -95,6 +129,7 @@ body {
 .last-message {
     color: #888;
     font-size: 0.8em;
+    margin-top: 3px;
 }
 .timestamp {
     color: #888;
@@ -136,10 +171,18 @@ body {
 .column {
     margin-left: 10px;
     margin-right: 10px;
-    height: 95vh;
     display: flex;
     flex-direction: column;
     width: 100%;
+}
+
+.column-fixed-height {
+    margin-left: 10px;
+    margin-right: 10px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 95vh;
 }
 
 .row {
@@ -290,4 +333,9 @@ body {
     position: absolute;
     visibility: hidden;
     height: 0;
+}
+
+.span-bold
+{
+    font-weight: bold;
 }
