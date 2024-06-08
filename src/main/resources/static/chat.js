@@ -15,7 +15,6 @@ function removeSelectedClass() {
 }
 
 document.getElementById('chat-send').addEventListener('click', function () {
-    // Assume you have the message data
     const chatInput = document.getElementById('chat-input');
     messageData = {
         senderID: currentUserID,
@@ -38,7 +37,14 @@ document.getElementById('chat-send').addEventListener('click', function () {
         body: JSON.stringify(messageData),
     })
         .then(response => response.json())
-        .then(data => console.log(data))
+        .then(responseString => {
+            console.log(responseString);
+
+            if (responseString.message === 'Message sent successfully') {
+
+
+            }
+        })
         .catch((error) => {
             console.error('Error:', error);
         });
@@ -137,9 +143,6 @@ function createMessageElement(direction, messageText, timestamp) {
         rowElement.className = 'row-mess';
 
         messageSpan.id = "left-span";
-        messageSpan.style.textAlign = 'left';
-        messageSpan.style.backgroundColor = '#D3E3FD';
-
         imageDiv.appendChild(imageElement);
         rowElement.appendChild(imageDiv);
         chatBox.appendChild(idElement);
@@ -152,9 +155,6 @@ function createMessageElement(direction, messageText, timestamp) {
         rowElement.className = 'row-mess-send';
 
         messageSpan.id = "right-span";
-        messageSpan.style.textAlign = 'right';
-        messageSpan.style.backgroundColor = 'rgb(211, 227, 253)';
-
 
         chatBox.appendChild(invisibleP);
 
@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(data => {
             const conversationBox = document.getElementById('.sidebar');
 
-           
+
 
 
             data.forEach(conversation => {
@@ -180,8 +180,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 conversationElement.className = 'sidebar-contact';
 
                 conversationElement.addEventListener('click', function () {
-                   conversationID = conversation.conversationID;
+                    //conversationID = conversation.conversationID;
                     conversationNum = conversation.conversationNum;
+
+                    // // Todo: remove hard
+                    // Document.getElementById('top-name').value = clientName;
+                    // Document.getElementById('top-image').src = clientPicture;
                     fetchMessages(conversationID, conversationNum);
                     removeSelectedClass(); // Remove selected class from all contacts
                     this.classList.add('sidebar-contact-selected'); // Add selected class to clicked contact
@@ -190,7 +194,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 );
 
-                
+
 
                 const imgElement = document.createElement('img');
                 imgElement.src = clientPicture;
@@ -241,7 +245,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 //conversationElement.className = 'sidebar-contact-selected';
 
-            
+
                 //selectedConversation.className = 'sidebar-contact'; // Reset the class name of the previously selected conversation
 
                 //selectedConversation = conversationElement;

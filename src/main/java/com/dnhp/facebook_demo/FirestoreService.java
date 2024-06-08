@@ -213,7 +213,7 @@ public class FirestoreService {
         
         if (response.statusCode() >= 200 && response.statusCode() < 300) {
             System.out.println("Message sent successfully");
-            return ResponseEntity.status(HttpStatus.OK).body("{\"message\":\"Message sent successfully\"}");
+            return ResponseEntity.status(HttpStatus.OK).body("{\"message\":\"OK\"}");
         } else {
             System.out.println("Failed to send message: " + response.body());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\":\"Failed to send message\"}");

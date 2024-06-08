@@ -4,14 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat App UI</title>
+    <title>Facebook Webhooks</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="meta.ico">
 </head>
 
 <body>
     <div id=".sidebar" class="sidebar">
-        <h2 class="sidebar-header">Contacts</h2>
-        <div class="sidebar-contact">
+        <h2 class="sidebar-header">Tin nhắn</h2>
+        
+        
+        <!-- <div class="sidebar-contact">
             <img src="avatar3.jpg" alt="avatar">
             <div class="contact-info">
                 <div class="row">
@@ -23,29 +26,31 @@
             </div>
             <span class="badge-right">1</span>
         </div>
-        <div class="sidebar-contact">
+        <div class="sidebar-contact-selected">
             <img src="avatar1.jpg" alt="avatar">
             <div class="contact-info">
                 <span>Bảo Trân</span>
                 <span class="last-message">Last message...</span>
                 <span class="timestamp">12:34 PM</span>
             </div>
-        </div>
+        </div> -->
 
 
     </div>
     <div class="column-fixed-height">
-        <div class="row">
+        <div class="row-top">
             <div class="sidebar-contact-top">
-                <img src="avatar3.jpg" alt="avatar">
-                <span>Phúc Đặng</span>
+                <img id="top-image" src="avatar3.jpg" alt="avatar">
+                <span id="top-name">Phúc Đặng</span>
             </div>
-            <button id="see-more">
-                <img src="more.jpg" alt="more">
+                <object style="padding-right: 20px;" data="more_horiz.svg" type="image/svg+xml">
+                </object>
         </div>
         <div class="message-container">
             <div id="chat-messages">
-                <p id="invisible"></p>
+                
+                
+                <!-- <p id="invisible"></p>
                 <div class="row-mess-send" data-timestamp="1717598656715">
                     <span id="right-span"
                         style="text-align: right; background-color: rgb(211, 227, 253);">
@@ -53,10 +58,12 @@
                     </span>
                 </div>
                 <p id="timestamp-right">1717598656715</p>
+ -->
+
             </div>
             <div id="send-section">
                 <input id="chat-input" type="text" placeholder="Nhập tin nhắn...">
-                <button id="chat-send">
+                <button id="chat-send" type="button">
                     <img src="send.svg" alt="Send">
                 </button>
             </div>
