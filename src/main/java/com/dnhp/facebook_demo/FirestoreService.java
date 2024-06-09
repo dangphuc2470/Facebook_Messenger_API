@@ -1,5 +1,6 @@
 package com.dnhp.facebook_demo;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
@@ -179,13 +180,13 @@ public class FirestoreService {
 		metadata.put("lastMessage", message.get("messageText"));
 		metadata.put("lastMessageTimestamp", message.get("timestamp"));
 		metadata.put("lastSenderID", message.get("senderID"));
-		metadata.put("conversationID", message.get("recipientID"));
+		metadata.put("conversationID", recipientId);
 		// Todo: Remove hardcoding
 		metadata.put("advisorId", "AD1");
 
+		Logger.getGlobal().info("Metadata: " + metadata);
 		// Save the metadata to Firestore
-		db.collection("message").document(recipientId).collection(conversationNum).document("conversation_metadata")
-				.set(metadata);
+
 
 
 
@@ -213,10 +214,18 @@ public class FirestoreService {
         
         if (response.statusCode() >= 200 && response.statusCode() < 300) {
             System.out.println("Message sent successfully");
+			db.collection("message").document(recipientId).collection(conversationNum).document("conversation_metadata")
+					.set(metadata);
             return ResponseEntity.status(HttpStatus.OK).body("{\"message\":\"OK\"}");
         } else {
-            System.out.println("Failed to send message: " + response.body());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\":\"Failed to send message\"}");
+
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode rootNode = mapper.readTree(response.body());
+			JsonNode errorMessageNode = rootNode.path("error").path("message");
+
+			String errorMessage = errorMessageNode.asText();
+            System.out.println("Failed to send message: " + errorMessage);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\":\"" + errorMessage + "\"}");
         }
 	}
 

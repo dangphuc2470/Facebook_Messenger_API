@@ -1,4 +1,3 @@
-
 var conversationNum = "2";
 var conversationID = "25240652615526181";
 var currentUserID = "245010088693541";
@@ -19,6 +18,7 @@ document.getElementById('chat-send').addEventListener('click', function () {
     messageData = {
         senderID: currentUserID,
         messageText: chatInput.value,
+        conversationID: conversationID,
         timestamp: new Date().getTime(),
     };
     const chatBox = document.getElementById('chat-messages');
@@ -29,6 +29,7 @@ document.getElementById('chat-send').addEventListener('click', function () {
 
 
     // Send the message to the Spring Boot application
+    console.log('Sending message:', conversationNum);
     fetch(`/send-message/${conversationID}/${conversationNum}`, {
         method: 'POST',
         headers: {
@@ -38,11 +39,13 @@ document.getElementById('chat-send').addEventListener('click', function () {
     })
         .then(response => response.json())
         .then(responseString => {
-            console.log(responseString);
-
-            if (responseString.message === 'Message sent successfully') {
-
-
+            if (responseString.message === 'OK') {
+                updateConversation();
+                console.log("Fetch conversation");
+            }
+            else
+            {
+                console.log(responseString.message)
             }
         })
         .catch((error) => {
@@ -68,8 +71,8 @@ async function fetchMessages(conversationID, conversationNum) {
         const chatBox = document.getElementById('chat-messages');
         const chatBoxElementCount = chatBox.childElementCount / 3;
         const dataElementCount = Object.keys(data).length;
-        console.log('chatBoxElementCount:', chatBoxElementCount);
-        console.log('dataElementCount:', dataElementCount);
+        //console.log('chatBoxElementCount:', chatBoxElementCount);
+        //console.log('dataElementCount:', dataElementCount);
 
         if (chatBoxElementCount < dataElementCount) {
             const keys = Object.keys(data);
@@ -95,8 +98,9 @@ async function fetchMessages(conversationID, conversationNum) {
 var source = new EventSource("/sse");
 
 source.onmessage = function () {
-    console.log('Fetching messages begin');
-    fetchMessages(conversationID, conversationNum);
+    fetchMessages(conversationID, conversationNum).then(() => {
+            updateConversation();
+    });
 };
 
 
@@ -167,33 +171,35 @@ function createMessageElement(direction, messageText, timestamp) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    fetchConversation();
+});
+
+
+function fetchConversation() {
     fetch('/get-conversation/' + conversationID)
         .then(response => response.json())
         .then(data => {
             const conversationBox = document.getElementById('.sidebar');
 
 
-
-
             data.forEach(conversation => {
                 const conversationElement = document.createElement('div');
                 conversationElement.className = 'sidebar-contact';
+                conversationNum = conversation.conversationNum;
 
                 conversationElement.addEventListener('click', function () {
-                    //conversationID = conversation.conversationID;
-                    conversationNum = conversation.conversationNum;
-
-                    // // Todo: remove hard
-                    // Document.getElementById('top-name').value = clientName;
-                    // Document.getElementById('top-image').src = clientPicture;
-                    fetchMessages(conversationID, conversationNum);
-                    removeSelectedClass(); // Remove selected class from all contacts
-                    this.classList.add('sidebar-contact-selected'); // Add selected class to clicked contact
-                    document.getElementById('chat-messages').innerHTML = '';
-                    fetchMessages(conversationID, conversationNum);
+                        //conversationID = conversation.conversationID;
+                        conversationNum = conversation.conversationNum;
+                       // console.log(conversationID + " " + conversationNum);
+                        // // Todo: remove hard
+                        // Document.getElementById('top-name').value = clientName;
+                        // Document.getElementById('top-image').src = clientPicture;
+                        fetchMessages(conversationID, conversationNum);
+                        removeSelectedClass(); // Remove selected class from all contacts
+                        this.classList.add('sidebar-contact-selected'); // Add selected class to clicked contact
+                        document.getElementById('chat-messages').innerHTML = '';
                 }
                 );
-
 
 
                 const imgElement = document.createElement('img');
@@ -216,16 +222,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const lastMessageElement = document.createElement('span');
                 lastMessageElement.className = 'last-message';
+                lastMessageElement.id = conversationID + "-" + conversationNum;
                 lastMessageElement.textContent = conversation.lastMessage;
 
-                if (conversation.lastSenderID != currentUserID) {
+                if (conversation.lastSenderID !== currentUserID) {
                     const badgeElement = document.createElement('span');
                     badgeElement.className = 'badge';
                     rowElement.appendChild(badgeElement);
                     lastMessageElement.style.fontWeight = 'bold';
                     lastMessageElement.style.color = 'black';
-                }
-                else {
+                } else {
                     lastMessageElement.textContent = "Bạn: " + lastMessageElement.textContent;
                 }
 
@@ -254,6 +260,35 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(() => {
             contacts[0].click();
         });
-});
+}
 
 
+function updateConversation() {
+    fetch('/get-conversation/' + conversationID)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(conversation => {
+                //console.log(conversation)
+                const id = conversationID + "-" + conversation.conversationNum;
+                const lastMessageElement = document.getElementById(id);
+                if (lastMessageElement && conversation.conversationNum === conversationNum) {
+                    if (conversation.lastSenderID !== conversation.
+                        conversationID)
+                    lastMessageElement.textContent = "Bạn: " + conversation.lastMessage;
+                    else
+                    {
+                        lastMessageElement.textContent = conversation.lastMessage;
+                        lastMessageElement.style.fontWeight = 'bold';
+                    }
+                }//conversationElement.className = 'sidebar-contact-selected';
+
+
+                //selectedConversation.className = 'sidebar-contact'; // Reset the class name of the previously selected conversation
+
+                //selectedConversation = conversationElement;
+            });
+        })
+        .then(() => {
+
+        });
+}
