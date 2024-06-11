@@ -10,6 +10,7 @@ FROM openjdk:17-jdk-slim
 
 EXPOSE 8080
 
-COPY --from=target /target/FacebookDemoApplication.jar app.jar
+COPY --from=build /target/FacebookDemoApplication.jar app.jar
+
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
