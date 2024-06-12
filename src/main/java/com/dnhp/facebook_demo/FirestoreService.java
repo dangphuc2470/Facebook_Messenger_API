@@ -33,71 +33,71 @@ public class FirestoreService {
 		db = FirestoreClient.getFirestore();
 	}
 
-	public void putReceivedMessage(String senderId, String recipientId, String messageText, long timestamp)
-			throws ExecutionException, InterruptedException {
-		// Create the message data
-		Map<String, Object> messageData = new HashMap<>();
-		messageData.put("messageText", messageText);
-		messageData.put("timestamp", timestamp);
-		messageData.put("senderID", senderId);
-		messageData.put("recipientID", recipientId);
-
-		DocumentSnapshot senderDoc = db.collection("message").document(senderId).get().get();
-		long count;
-		if (senderDoc.exists()) {
-			Long conversationCount = senderDoc.getLong("conversationCount");
-			count = conversationCount;
-		} else {
-			// If the document does not exist, set count to 1
-			count = 1;
-		}
-		DocumentSnapshot conversationMetadataSnapshot = db.collection("message").document(senderId)
-				.collection(String.valueOf(count)).document("conversation_metadata").get().get();
-		Long lastMessageTimestamp = conversationMetadataSnapshot.getLong("lastMessageTimestamp");
-		if (lastMessageTimestamp != null && (timestamp - lastMessageTimestamp) > 10 * 1000) // New
-																										// conversation
-																										// if the last
-																										// message was
-																										// sent more
-																										// than 24 hour
-																										// ago
-		{
-			count += 1;
-			senderDoc.getReference().update("conversationCount", count);
-			Logger.getGlobal().info("New conversation started");
-		}
-
-		// Save the message data to Firestore
-		db.collection("message").document(senderId).collection(String.valueOf(count))
-				.document(String.valueOf(timestamp)).set(messageData);
-
-		// Update the conversationCount in the senderId document
-		Map<String, Object> senderData = new HashMap<>();
-		senderData.put("conversationCount", count);
-		db.collection("message").document(senderId).set(senderData);
-
-		// // Get the metadata document
-		DocumentSnapshot metadataDoc = db.collection("message").document(senderId).collection(String.valueOf(count))
-				.document("conversation_metadata").get().get();
-
-				// Create or update the metadata
-		Map<String, Object> metadata = new HashMap<>();
-		if (metadataDoc.exists()) {
-			metadata = metadataDoc.getData();
-		} else {
-			metadata.put("firstMessageTimestamp", timestamp);
-		}
-		metadata.put("lastMessage", messageText);
-		metadata.put("lastMessageTimestamp", timestamp);
-		metadata.put("lastSenderID", senderId);
-		metadata.put("conversationID", senderId);
-
-
-		// Save the metadata to Firestore
-		db.collection("message").document(senderId).collection(String.valueOf(count)).document("conversation_metadata")
-				.set(metadata);
-
-	}
+//	public void putReceivedMessage(String senderId, String recipientId, String messageText, long timestamp)
+//			throws ExecutionException, InterruptedException {
+//		// Create the message data
+//		Map<String, Object> messageData = new HashMap<>();
+//		messageData.put("messageText", messageText);
+//		messageData.put("timestamp", timestamp);
+//		messageData.put("senderID", senderId);
+//		messageData.put("recipientID", recipientId);
+//
+//		DocumentSnapshot senderDoc = db.collection("message").document(senderId).get().get();
+//		long count;
+//		if (senderDoc.exists()) {
+//			Long conversationCount = senderDoc.getLong("conversationCount");
+//			count = conversationCount;
+//		} else {
+//			// If the document does not exist, set count to 1
+//			count = 1;
+//		}
+//		DocumentSnapshot conversationMetadataSnapshot = db.collection("message").document(senderId)
+//				.collection(String.valueOf(count)).document("conversation_metadata").get().get();
+//		Long lastMessageTimestamp = conversationMetadataSnapshot.getLong("lastMessageTimestamp");
+//		if (lastMessageTimestamp != null && (timestamp - lastMessageTimestamp) > 60 * 60 * 24 * 1000) // New
+//																										// conversation
+//																										// if the last
+//																										// message was
+//																										// sent more
+//																										// than 24 hour
+//																										// ago
+//		{
+//			count += 1;
+//			senderDoc.getReference().update("conversationCount", count);
+//			Logger.getGlobal().info("New conversation started");
+//		}
+//
+//		// Save the message data to Firestore
+//		db.collection("message").document(senderId).collection(String.valueOf(count))
+//				.document(String.valueOf(timestamp)).set(messageData);
+//
+//		// Update the conversationCount in the senderId document
+//		Map<String, Object> senderData = new HashMap<>();
+//		senderData.put("conversationCount", count);
+//		db.collection("message").document(senderId).set(senderData);
+//
+//		// // Get the metadata document
+//		DocumentSnapshot metadataDoc = db.collection("message").document(senderId).collection(String.valueOf(count))
+//				.document("conversation_metadata").get().get();
+//
+//				// Create or update the metadata
+//		Map<String, Object> metadata = new HashMap<>();
+//		if (metadataDoc.exists()) {
+//			metadata = metadataDoc.getData();
+//		} else {
+//			metadata.put("firstMessageTimestamp", timestamp);
+//		}
+//		metadata.put("lastMessage", messageText);
+//		metadata.put("lastMessageTimestamp", timestamp);
+//		metadata.put("lastSenderID", senderId);
+//		metadata.put("conversationID", senderId);
+//
+//
+//		// Save the metadata to Firestore
+//		db.collection("message").document(senderId).collection(String.valueOf(count)).document("conversation_metadata")
+//				.set(metadata);
+//
+//	}
 
 //	public void putAdvisor(String advisorId, String name, String status)
 //			throws ExecutionException, InterruptedException {
@@ -269,11 +269,15 @@ public class FirestoreService {
 			}
 	
 			// Compare timestamps
-			return timestamp1.compareTo(timestamp2);
+			return timestamp2.compareTo(timestamp1);
 		});
 
 
-		Logger.getGlobal().info("Conversations: " + conversations);
+		for (Map<String, Object> conversation : conversations) {
+			String conversationNum = (String) conversation.get("conversationNum");
+			String conversationLastTimestamp = conversation.get("lastMessageTimestamp").toString();
+			Logger.getGlobal().info("Conversation: " + conversationNum + " Last message timestamp: " + conversationLastTimestamp);
+		}
 
 		return conversations;
 	}

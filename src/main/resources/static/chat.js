@@ -43,8 +43,7 @@ document.getElementById('chat-send').addEventListener('click', function () {
                 updateConversation();
                 console.log("Fetch conversation");
             }
-            else
-            {
+            else {
                 console.log(responseString.message)
             }
         })
@@ -73,7 +72,7 @@ async function fetchMessages(conversationID, conversationNum) {
         const dataElementCount = Object.keys(data).length;
         //console.log('chatBoxElementCount:', chatBoxElementCount);
         //console.log('dataElementCount:', dataElementCount);
-
+        //updateConversation();
         if (chatBoxElementCount < dataElementCount) {
             const keys = Object.keys(data);
             for (let i = chatBoxElementCount; i < dataElementCount; i++) {
@@ -95,13 +94,13 @@ async function fetchMessages(conversationID, conversationNum) {
 }
 
 
-var source = new EventSource("/sse");
-
-source.onmessage = function () {
-    fetchMessages(conversationID, conversationNum).then(() => {
-            updateConversation();
-    });
-};
+// var source = new EventSource("/sse");
+//
+// source.onmessage = function () {
+//     fetchMessages(conversationID, conversationNum).then(() => {
+//             updateConversation();
+//     });
+// };
 
 
 function formatTimestamp(timestamp) {
@@ -171,11 +170,11 @@ function createMessageElement(direction, messageText, timestamp) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    fetchConversation();
+    fetchConversation(true);
 });
 
 
-function fetchConversation() {
+function fetchConversation(isFirstLoad = false) {
     fetch('/get-conversation/' + conversationID)
         .then(response => response.json())
         .then(data => {
@@ -188,16 +187,18 @@ function fetchConversation() {
                 conversationNum = conversation.conversationNum;
 
                 conversationElement.addEventListener('click', function () {
-                        //conversationID = conversation.conversationID;
-                        conversationNum = conversation.conversationNum;
-                       // console.log(conversationID + " " + conversationNum);
-                        // // Todo: remove hard
-                        // Document.getElementById('top-name').value = clientName;
-                        // Document.getElementById('top-image').src = clientPicture;
-                        fetchMessages(conversationID, conversationNum);
-                        removeSelectedClass(); // Remove selected class from all contacts
-                        this.classList.add('sidebar-contact-selected'); // Add selected class to clicked contact
+                    //conversationID = conversation.conversationID;
+                    if (conversationNum !== conversation.conversationNum)
                         document.getElementById('chat-messages').innerHTML = '';
+                    conversationNum = conversation.conversationNum;
+                    console.log("fet" + conversationID + " " + conversationNum);
+                    fetchMessages(conversationID, conversationNum);
+                    // console.log(conversationID + " " + conversationNum);
+                    // // Todo: remove hard
+                    // Document.getElementById('top-name').value = clientName;
+                    // Document.getElementById('top-image').src = clientPicture;
+                    removeSelectedClass(); // Remove selected class from all contacts
+                    this.classList.add('sidebar-contact-selected'); // Add selected class to clicked contact
                 }
                 );
 
@@ -232,7 +233,10 @@ function fetchConversation() {
                     lastMessageElement.style.fontWeight = 'bold';
                     lastMessageElement.style.color = 'black';
                 } else {
+                    lastMessageElement.style.fontWeight = 'normal';
+                    lastMessageElement.style.color = '#888';
                     lastMessageElement.textContent = "Bạn: " + lastMessageElement.textContent;
+
                 }
 
                 infoElement.appendChild(lastMessageElement);
@@ -258,12 +262,18 @@ function fetchConversation() {
             });
         })
         .then(() => {
-            contacts[0].click();
+            if (isFirstLoad) {
+                console.log("First load");
+                contacts[0].click();
+            }
         });
 }
 
 
 function updateConversation() {
+    console.log('Updating conversation');
+    fetchMessages(conversationID, conversationNum);
+
     fetch('/get-conversation/' + conversationID)
         .then(response => response.json())
         .then(data => {
@@ -271,17 +281,36 @@ function updateConversation() {
                 //console.log(conversation)
                 const id = conversationID + "-" + conversation.conversationNum;
                 const lastMessageElement = document.getElementById(id);
+                const parentElement = lastMessageElement.parentElement;
+                const rowElement = parentElement.querySelector('.row');
                 if (lastMessageElement && conversation.conversationNum === conversationNum) {
                     if (conversation.lastSenderID !== conversation.
-                        conversationID)
-                    lastMessageElement.textContent = "Bạn: " + conversation.lastMessage;
-                    else
-                    {
+                        conversationID) {
+                        lastMessageElement.textContent = "Bạn: " + conversation.lastMessage;
+                        lastMessageElement.style.fontWeight = 'normal';
+                        lastMessageElement.style.color = '#888';
+                        const badgeElement = rowElement.querySelector('.badge');
+
+                        if (badgeElement) {
+                            console.log("remove badge");
+                            rowElement.removeChild(badgeElement);
+                        }
+                        const Name = rowElement.querySelector('.span-bold');
+                        Name.value = clientName + " | " + (conversation.advisorId || 'N/A');
+                    }
+                    else {
                         lastMessageElement.textContent = conversation.lastMessage;
                         lastMessageElement.style.fontWeight = 'bold';
+                        lastMessageElement.style.color = 'black';
+                        const badgeElement = rowElement.querySelector('.badge');
+                        if (!badgeElement) {
+                            const badgeElement = document.createElement('span');
+                            badgeElement.className = 'badge';
+                            rowElement.appendChild(badgeElement);
+                        }
                     }
                 }//conversationElement.className = 'sidebar-contact-selected';
-
+                //fetchMessages(conversationID, conversationNum);
 
                 //selectedConversation.className = 'sidebar-contact'; // Reset the class name of the previously selected conversation
 
@@ -292,3 +321,12 @@ function updateConversation() {
 
         });
 }
+
+
+document.getElementById('test').addEventListener('click', function () {
+    console.log("test click");
+    updateConversation();
+});
+
+// Call updateConversation every second
+//setInterval(updateConversation, 1000);

@@ -11,6 +11,7 @@ FROM openjdk:17-jdk-slim
 
 EXPOSE 8080
 COPY chatapp-d4662-firebase-adminsdk-4zh1x-e6458f015b.json .
+COPY src/main/resources/static/Avatar3.jpg .
 COPY --from=build /target/Facebook_demo-0.0.1-SNAPSHOT.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
