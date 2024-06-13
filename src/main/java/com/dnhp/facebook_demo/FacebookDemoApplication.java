@@ -1,39 +1,24 @@
 package com.dnhp.facebook_demo;
 
-import com.google.cloud.firestore.*;
-import com.google.firebase.cloud.FirestoreClient;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import org.json.JSONObject;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import javax.annotation.Nullable;
-import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @RestController
@@ -58,7 +43,7 @@ public class FacebookDemoApplication
         String mode = request.getParameter("hub.mode");
         String challenge = request.getParameter("hub.challenge");
         String token = request.getParameter("hub.verify_token");
-        LOGGER.info("mode:" + mode);
+        LOGGER.info("mode:{}", mode);
         LOGGER.info("challenge:" + challenge);
         LOGGER.info("token:" + token);
         if ("subscribe".equals(mode) && token != null && token.equals("dnhp_token"))
@@ -78,51 +63,39 @@ public class FacebookDemoApplication
 
     private String latestMessage = "";
 
-    @GetMapping(value = "latest-message")
-    public String getLatestMessage()
-    {
-        String message = latestMessage;
-        latestMessage = null;
-        return message;
-    }
-
-//    @PostMapping(value = "callback")
-//    public String callback(@RequestBody String input) throws ExecutionException, InterruptedException
+//    @GetMapping(value = "latest-message")
+//    public String getLatestMessage()
 //    {
-//        LOGGER.info("requestBody:" + input);
-//        latestMessage = input;
-//
-//        // Parse the input string to JSON
-//        JSONObject jsonObject = new JSONObject(input);
-//
-//        JSONObject firstEntry = jsonObject.getJSONArray("entry").getJSONObject(0);
-//        //long time = firstEntry.getLong("time");
-//        //String entryId = firstEntry.getString("id");
-//
-//        JSONObject firstMessaging = firstEntry.getJSONArray("messaging").getJSONObject(0);
-//        String senderId = firstMessaging.getJSONObject("sender").getString("id");
-//        String recipientId = firstMessaging.getJSONObject("recipient").getString("id");
-//        long timestamp = firstMessaging.getLong("timestamp");
-//        //String mid = firstMessaging.getJSONObject("message").getString("mid");
-//        String messageText = firstMessaging.getJSONObject("message").getString("text");
-//
-//        // Save the message to Firestore
-//        firestoreService.putReceivedMessage(senderId, recipientId, messageText, timestamp);
-//        return "OK";
+//        String message = latestMessage;
+//        latestMessage = null;
+//        return message;
 //    }
 
-    @PostMapping("/send-message/{recipientId}/{conversationNum}")
-    public ResponseEntity<String> sendMessage(@PathVariable String recipientId, @PathVariable String conversationNum, @RequestBody Map<String, Object> message) throws IOException, InterruptedException, ExecutionException
+    @PostMapping(value = "callback")
+    public String callback(@RequestBody String input) throws ExecutionException, InterruptedException
     {
-        return firestoreService.sendMessage(recipientId, message, conversationNum);
+        LOGGER.info("requestBody:" + input);
+        latestMessage = input;
+
+        // Parse the input string to JSON
+        JSONObject jsonObject = new JSONObject(input);
+
+        JSONObject firstEntry = jsonObject.getJSONArray("entry").getJSONObject(0);
+        //long time = firstEntry.getLong("time");
+        //String entryId = firstEntry.getString("id");
+
+        JSONObject firstMessaging = firstEntry.getJSONArray("messaging").getJSONObject(0);
+        String senderId = firstMessaging.getJSONObject("sender").getString("id");
+        String recipientId = firstMessaging.getJSONObject("recipient").getString("id");
+        long timestamp = firstMessaging.getLong("timestamp");
+        //String mid = firstMessaging.getJSONObject("message").getString("mid");
+        String messageText = firstMessaging.getJSONObject("message").getString("text");
+
+        // Save the message to Firestore
+        firestoreService.putReceivedMessage(senderId, recipientId, messageText, timestamp);
+        return "OK";
     }
 
-
-    @GetMapping("/get-messages/{senderId}/{conversationNum}")
-    public Map<String, Map<String, Object>> getMessages(@PathVariable String senderId, @PathVariable String conversationNum) throws ExecutionException, InterruptedException {
-        LOGGER.info("Getting messages for senderId: " + senderId + " and conversationNum: " + conversationNum);
-        return firestoreService.getMessages(senderId, conversationNum);
-}
 
 
     @GetMapping("/hello")
@@ -187,10 +160,26 @@ public class FacebookDemoApplication
 //    }
 
    @GetMapping("/get-conversation/{ID}")
-   public List<Map<String, Object>> getConversation(@PathVariable String ID) throws Exception {
+   public List<Map<String, Object>> getConversation(@PathVariable String ID)
+           throws Exception
+   {
         return firestoreService.getConversation(ID);
    }
-    
 
+    @GetMapping("/get-messages/{senderId}/{conversationNum}")
+    public Map<String, Map<String, Object>> getMessages(@PathVariable String senderId, @PathVariable String conversationNum)
+            throws ExecutionException, InterruptedException
+    {
+        LOGGER.info("Getting messages for senderId: " + senderId + " and conversationNum: " + conversationNum);
+        return firestoreService.getMessages(senderId, conversationNum);
+    }
+
+    @PostMapping("/send-message/{recipientId}/{conversationNum}")
+    public ResponseEntity<String> sendMessage(@PathVariable String recipientId, @PathVariable String conversationNum,
+                                              @RequestBody Map<String, Object> message)
+            throws IOException, InterruptedException, ExecutionException
+    {
+        return firestoreService.sendMessage(recipientId, message, conversationNum);
+    }
 }
 

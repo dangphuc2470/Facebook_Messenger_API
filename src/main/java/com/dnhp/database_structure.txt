@@ -2,16 +2,22 @@
         - senderId (document)
                     - conversationCount (field)
                     - conversation_id (document)
-                        - timestamp (document)
-                                - messageText (field)
-                                - timestamp (field)
-                                - recipientID (field)
-                                - senderID (field)
-                        - conversation_metadata (document)
-                                - firstMessageTimestamp (field)
-                                - lastMessage (field)
-                                - lastMessageTimestamp (field)
-                                - advisorId (field)
+                                - timestampForEachMessage (document)
+                                        - messageText (field)
+                                        - timestamp (field)
+                                        - recipientID (field)
+                                        - senderID (field)
+                                - conversation_metadata (document)
+                                        - advisorId (field)
+                                        - conversation_ID (field)
+                                        - firstMessageTimestamp (field)
+                                        - lastMessage (field)
+                                        - lastMessageTimestamp (field)
+                                        - lastSenderID (field)
 
 - advisor (collection)
+        
+
+
+
         

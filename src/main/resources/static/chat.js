@@ -1,55 +1,13 @@
-var conversationNum = "2";
-var conversationID = "25240652615526181";
-var currentUserID = "245010088693541";
-var clientName = "Phúc Đặng";
-var clientPicture = "avatar3.jpg";
-var selectedConversation = document.createElement('div');
-var contacts = document.getElementsByClassName('sidebar-contact');
-var currentAD = "AD1";
-// Function to remove selected class from all contacts
-function removeSelectedClass() {
-    for (var i = 0; i < contacts.length; i++) {
-        contacts[i].classList.remove('sidebar-contact-selected');
-    }
-}
-
+let conversationNum = "2";
+let conversationID = "25240652615526181";
+let currentUserID = "245010088693541";
+let clientName = "Phúc Đặng";
+let clientPicture = "avatar3.jpg";
+let selectedConversation = document.createElement('div');
+let contacts = document.getElementsByClassName('sidebar-contact');
+let currentAD = "AD1";
 document.getElementById('chat-send').addEventListener('click', function () {
-    const chatInput = document.getElementById('chat-input');
-    messageData = {
-        senderID: currentUserID,
-        messageText: chatInput.value,
-        conversationID: conversationID,
-        timestamp: new Date().getTime(),
-    };
-    const chatBox = document.getElementById('chat-messages');
-    createMessageElement('right', messageData.messageText, messageData.timestamp, true);
-    chatInput.value = '';
-    chatInput.focus();
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-
-    // Send the message to the Spring Boot application
-    console.log('Sending message:', conversationNum);
-    fetch(`/send-message/${conversationID}/${conversationNum}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(messageData),
-    })
-        .then(response => response.json())
-        .then(responseString => {
-            if (responseString.message === 'OK') {
-                updateConversation();
-                console.log("Fetch conversation");
-            }
-            else {
-                console.log(responseString.message)
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+    sendMessage();
 
 });
 
@@ -59,45 +17,6 @@ document.getElementById('chat-input').addEventListener('keypress', function (e) 
     }
 });
 
-async function fetchMessages(conversationID, conversationNum) {
-    try {
-        console.log('Fetching messages');
-        const response = await fetch(`/get-messages/${conversationID}/${conversationNum}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        const chatBox = document.getElementById('chat-messages');
-        const chatBoxElementCount = chatBox.childElementCount / 3;
-        const dataElementCount = Object.keys(data).length;
-        //console.log('chatBoxElementCount:', chatBoxElementCount);
-        //console.log('dataElementCount:', dataElementCount);
-        //updateConversation();
-        const lastElement = chatBox.lastElementChild;
-        if (lastElement && lastElement.textContent === 'Đang gửi') {
-            lastElement.textContent = formatTimestamp(data[Object.keys(data)[dataElementCount - 1]].timestamp);
-        } 
-
-        if (chatBoxElementCount < dataElementCount) {
-            const keys = Object.keys(data);
-            for (let i = chatBoxElementCount; i < dataElementCount; i++) {
-                const messageData = data[keys[i]];
-
-                if (messageData.senderID !== currentUserID) {
-                    createMessageElement('left', messageData.messageText, messageData.timestamp);
-                } else {
-                    createMessageElement('right', messageData.messageText, messageData.timestamp);
-
-                }
-            }
-        }
-
-        chatBox.scrollTop = chatBox.scrollHeight;
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
-
 
 // var source = new EventSource("/sse");
 //
@@ -106,76 +25,6 @@ async function fetchMessages(conversationID, conversationNum) {
 //             updateConversation();
 //     });
 // };
-
-
-function formatTimestamp(timestamp) {
-    const date = new Date(timestamp);
-
-    // Extract the date, month, year, and time
-    const day = date.getDate();
-    const month = date.getMonth() + 1; // getMonth() returns a zero-based month
-    const year = date.getFullYear();
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-
-    // Format the timestamp
-    return `${day} thg ${month} ${year} - ${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
-}
-
-
-function createMessageElement(direction, messageText, timestamp, isCreateDirectlyAfterSend = false) {
-    const chatBox = document.getElementById('chat-messages');
-    const rowElement = document.createElement('div');
-    rowElement.setAttribute('data-timestamp', timestamp);
-
-    const messageSpan = document.createElement('span');
-    const messageTextElement = document.createElement('p');
-    messageTextElement.textContent = `${messageText}`;
-    messageSpan.appendChild(messageTextElement);
-
-    const timestampElement = document.createElement('p');
-    const formattedTimestamp = formatTimestamp(timestamp);
-    if (isCreateDirectlyAfterSend)
-        timestampElement.textContent = 'Đang gửi';
-    else 
-        timestampElement.textContent = `${formattedTimestamp}`;
-
-    if (direction === 'left') {
-        const idElement = document.createElement('p');
-        idElement.id = "id";
-        // Todo: Remove hardcode
-        idElement.textContent = clientName;
-
-        const imageDiv = document.createElement('div');
-
-        const imageElement = document.createElement('img');
-        imageElement.src = clientPicture;
-
-        rowElement.className = 'row-mess';
-
-        messageSpan.id = "left-span";
-        imageDiv.appendChild(imageElement);
-        rowElement.appendChild(imageDiv);
-        chatBox.appendChild(idElement);
-
-        timestampElement.id = "timestamp";
-    } else {
-        const invisibleP = document.createElement('p');
-        invisibleP.id = "invisible";
-
-        rowElement.className = 'row-mess-send';
-
-        messageSpan.id = "right-span";
-
-        chatBox.appendChild(invisibleP);
-
-        timestampElement.id = "timestamp-right";
-    }
-
-    rowElement.appendChild(messageSpan);
-    chatBox.appendChild(rowElement);
-    chatBox.appendChild(timestampElement);
-}
 
 document.addEventListener("DOMContentLoaded", function () {
     fetchConversation(true);
@@ -277,10 +126,86 @@ function fetchConversation(isFirstLoad = false) {
         });
 }
 
+async function fetchMessages(conversationID, conversationNum) {
+    try {
+        console.log('Fetching messages');
+        const response = await fetch(`/get-messages/${conversationID}/${conversationNum}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const chatBox = document.getElementById('chat-messages');
+        const chatBoxElementCount = chatBox.childElementCount / 3;
+        const dataElementCount = Object.keys(data).length;
+        //console.log('chatBoxElementCount:', chatBoxElementCount);
+        //console.log('dataElementCount:', dataElementCount);
+        //updateConversation();
+        const lastElement = chatBox.lastElementChild;
+        if (lastElement && lastElement.textContent === 'Đang gửi') {
+            lastElement.textContent = formatTimestamp(data[Object.keys(data)[dataElementCount - 1]].timestamp);
+        }
+
+        if (chatBoxElementCount < dataElementCount) {
+            const keys = Object.keys(data);
+            for (let i = chatBoxElementCount; i < dataElementCount; i++) {
+                const messageData = data[keys[i]];
+
+                if (messageData.senderID !== currentUserID) {
+                    createMessageElement('left', messageData.messageText, messageData.timestamp);
+                } else {
+                    createMessageElement('right', messageData.messageText, messageData.timestamp);
+
+                }
+            }
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+function sendMessage() {
+    const chatInput = document.getElementById('chat-input');
+    let messageData = {
+        senderID: currentUserID,
+        messageText: chatInput.value,
+        conversationID: conversationID,
+        timestamp: new Date().getTime(),
+    };
+    const chatBox = document.getElementById('chat-messages');
+    createMessageElement('right', messageData.messageText, messageData.timestamp, true);
+    chatInput.value = '';
+    chatInput.focus();
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+
+    // Send the message to the Spring Boot application
+    console.log('Sending message:', conversationNum);
+    fetch(`/send-message/${conversationID}/${conversationNum}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messageData),
+    })
+        .then(response => response.json())
+        .then(responseString => {
+            if (responseString.message === 'OK') {
+                updateConversation();
+                console.log("Fetch conversation");
+            }
+            else {
+                console.log(responseString.message)
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+}
 
 function updateConversation() {
     console.log('Updating conversation');
-    fetchMessages(conversationID, conversationNum);
 
     fetch('/get-conversation/' + conversationID)
         .then(response => response.json())
@@ -329,10 +254,84 @@ function updateConversation() {
             });
         })
         .then(() => {
+            fetchMessages(conversationID, conversationNum);
 
         });
 }
 
+function createMessageElement(direction, messageText, timestamp, isCreateDirectlyAfterSend = false) {
+    const chatBox = document.getElementById('chat-messages');
+    const rowElement = document.createElement('div');
+    rowElement.setAttribute('data-timestamp', timestamp);
+
+    const messageSpan = document.createElement('span');
+    const messageTextElement = document.createElement('p');
+    messageTextElement.textContent = `${messageText}`;
+    messageSpan.appendChild(messageTextElement);
+
+    const timestampElement = document.createElement('p');
+    const formattedTimestamp = formatTimestamp(timestamp);
+    if (isCreateDirectlyAfterSend)
+        timestampElement.textContent = 'Đang gửi';
+    else
+        timestampElement.textContent = `${formattedTimestamp}`;
+
+    if (direction === 'left') {
+        const idElement = document.createElement('p');
+        idElement.id = "id";
+        // Todo: Remove hardcode
+        idElement.textContent = clientName;
+
+        const imageDiv = document.createElement('div');
+
+        const imageElement = document.createElement('img');
+        imageElement.src = clientPicture;
+
+        rowElement.className = 'row-mess';
+
+        messageSpan.id = "left-span";
+        imageDiv.appendChild(imageElement);
+        rowElement.appendChild(imageDiv);
+        chatBox.appendChild(idElement);
+
+        timestampElement.id = "timestamp";
+    } else {
+        const invisibleP = document.createElement('p');
+        invisibleP.id = "invisible";
+
+        rowElement.className = 'row-mess-send';
+
+        messageSpan.id = "right-span";
+
+        chatBox.appendChild(invisibleP);
+
+        timestampElement.id = "timestamp-right";
+    }
+
+    rowElement.appendChild(messageSpan);
+    chatBox.appendChild(rowElement);
+    chatBox.appendChild(timestampElement);
+}
+
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+
+    // Extract the date, month, year, and time
+    const day = date.getDate();
+    const month = date.getMonth() + 1; // getMonth() returns a zero-based month
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+
+    // Format the timestamp
+    return `${day} thg ${month} ${year} - ${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
+}
+
+function removeSelectedClass() {
+    for (let i = 0; i < contacts.length; i++) {
+        contacts[i].classList.remove('sidebar-contact-selected');
+    }
+}
 
 document.getElementById('test').addEventListener('click', function () {
     console.log("test click");
