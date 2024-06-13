@@ -5,7 +5,7 @@ var clientName = "Phúc Đặng";
 var clientPicture = "avatar3.jpg";
 var selectedConversation = document.createElement('div');
 var contacts = document.getElementsByClassName('sidebar-contact');
-
+var currentAD = "AD1";
 // Function to remove selected class from all contacts
 function removeSelectedClass() {
     for (var i = 0; i < contacts.length; i++) {
@@ -22,7 +22,7 @@ document.getElementById('chat-send').addEventListener('click', function () {
         timestamp: new Date().getTime(),
     };
     const chatBox = document.getElementById('chat-messages');
-    createMessageElement('right', messageData.messageText, messageData.timestamp);
+    createMessageElement('right', messageData.messageText, messageData.timestamp, true);
     chatInput.value = '';
     chatInput.focus();
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -73,12 +73,17 @@ async function fetchMessages(conversationID, conversationNum) {
         //console.log('chatBoxElementCount:', chatBoxElementCount);
         //console.log('dataElementCount:', dataElementCount);
         //updateConversation();
+        const lastElement = chatBox.lastElementChild;
+        if (lastElement && lastElement.textContent === 'Đang gửi') {
+            lastElement.textContent = formatTimestamp(data[Object.keys(data)[dataElementCount - 1]].timestamp);
+        } 
+
         if (chatBoxElementCount < dataElementCount) {
             const keys = Object.keys(data);
             for (let i = chatBoxElementCount; i < dataElementCount; i++) {
                 const messageData = data[keys[i]];
 
-                if (messageData.senderID != currentUserID) {
+                if (messageData.senderID !== currentUserID) {
                     createMessageElement('left', messageData.messageText, messageData.timestamp);
                 } else {
                     createMessageElement('right', messageData.messageText, messageData.timestamp);
@@ -118,7 +123,7 @@ function formatTimestamp(timestamp) {
 }
 
 
-function createMessageElement(direction, messageText, timestamp) {
+function createMessageElement(direction, messageText, timestamp, isCreateDirectlyAfterSend = false) {
     const chatBox = document.getElementById('chat-messages');
     const rowElement = document.createElement('div');
     rowElement.setAttribute('data-timestamp', timestamp);
@@ -130,7 +135,10 @@ function createMessageElement(direction, messageText, timestamp) {
 
     const timestampElement = document.createElement('p');
     const formattedTimestamp = formatTimestamp(timestamp);
-    timestampElement.textContent = `${formattedTimestamp}`;
+    if (isCreateDirectlyAfterSend)
+        timestampElement.textContent = 'Đang gửi';
+    else 
+        timestampElement.textContent = `${formattedTimestamp}`;
 
     if (direction === 'left') {
         const idElement = document.createElement('p');
@@ -294,9 +302,12 @@ function updateConversation() {
                         if (badgeElement) {
                             console.log("remove badge");
                             rowElement.removeChild(badgeElement);
+                            let nameElement = rowElement.querySelector('.span-bold');
+                            if (nameElement.textContent.endsWith("N/A")) {
+                                nameElement.textContent = clientName + " | " + currentAD;
+                            }
                         }
-                        const Name = rowElement.querySelector('.span-bold');
-                        Name.value = clientName + " | " + (conversation.advisorId || 'N/A');
+
                     }
                     else {
                         lastMessageElement.textContent = conversation.lastMessage;
