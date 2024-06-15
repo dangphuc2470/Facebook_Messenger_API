@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+
+@CrossOrigin(origins = "*")
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
 @RestController
 public class FacebookDemoApplication
@@ -33,9 +36,11 @@ public class FacebookDemoApplication
     @Autowired
     private KafkaProducerService kafkaProducerService;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @GetMapping("/trigger-reload")
     public String testEndpoint() {
-
         kafkaProducerService.sendMessage("Reload messages command sent from Kafka topic");
         return "Message sent to Kafka topic";
     }
@@ -136,6 +141,7 @@ public class FacebookDemoApplication
                 FirebaseApp.initializeApp(options);
             }
             firestoreService = new FirestoreService();
+
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -197,4 +203,6 @@ public class FacebookDemoApplication
     {
         return firestoreService.sendMessage(recipientId, message, conversationNum);
     }
+
+
 }

@@ -2,6 +2,7 @@ package com.dnhp.facebook_demo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.cloud.firestore.*;
+import com.google.cloud.firestore.EventListener;
 import com.google.firebase.cloud.FirestoreClient;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,8 @@ import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import javax.annotation.Nullable;
+
 @Service
 public class FirestoreService {
 	public final Firestore db;
@@ -27,6 +30,7 @@ public class FirestoreService {
 	public FirestoreService() {
 		db = FirestoreClient.getFirestore();
 	}
+
 
 	/// Region chat received message
 	public void putReceivedMessage(String senderId, String recipientId, String messageText, long timestamp)
@@ -162,7 +166,7 @@ public class FirestoreService {
 		for (Map<String, Object> conversation : conversations) {
 			String conversationNum = (String) conversation.get("conversationNum");
 			String conversationLastTimestamp = conversation.get("lastMessageTimestamp").toString();
-			Logger.getGlobal().info("Conversation: " + conversationNum + " Last message timestamp: " + conversationLastTimestamp);
+			//Logger.getGlobal().info("Conversation: " + conversationNum + " Last message timestamp: " + conversationLastTimestamp);
 		}
 
 		return conversations;
