@@ -42,6 +42,14 @@ public class FacebookDemoApplication
     @GetMapping("/trigger-reload")
     public String testEndpoint() {
         kafkaProducerService.sendMessage("Reload messages command sent from Kafka topic");
+        LOGGER.info("Message sent to Kafka topic to reload messages");
+        return "Message sent to Kafka topic to reload messages";
+    }
+
+    @GetMapping("/trigger-conversation")
+    public String testEndpoint2() {
+        kafkaProducerService.sendMessage("Reload conversations command sent from Kafka topic");
+        LOGGER.info("Message sent to Kafka topic to reload conversations");
         return "Message sent to Kafka topic";
     }
 
@@ -53,7 +61,18 @@ public class FacebookDemoApplication
         SpringApplication.run(FacebookDemoApplication.class, args);
     }
     @GetMapping("/test")
-    public String test() {
+    public String test() throws ExecutionException, InterruptedException
+    {
+        firestoreService.findAdvisor("25240652615526181", 3);
+        return "Test";
+    }
+    @GetMapping("/testAdvisor")
+    public String test2() throws ExecutionException, InterruptedException
+    {
+        firestoreService.putAdvisor("AD1", "AD1", "free");
+        firestoreService.putAdvisor("AD2", "AD2", "free");
+        firestoreService.putAdvisor("AD3", "AD3", "free");
+        //firestoreService.findAdvisor("25240652615526181", 3);
         return "Test";
     }
 

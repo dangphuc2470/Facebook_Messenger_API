@@ -1,7 +1,7 @@
 - message (collection)
         - senderId (document)
-                    - conversationCount (field)
-                    - conversation_id (document)
+                        - conversationCount (field)
+                        - conversation_id (document)
                                 - timestampForEachMessage (document)
                                         - messageText (field)
                                         - timestamp (field)
@@ -16,6 +16,10 @@
                                         - lastSenderID (field)
 
 - advisor (collection)
+        - advisorId (document)
+                        - conversationCount (field)
+                        - name (field)
+                        - status (field)
         
 
 

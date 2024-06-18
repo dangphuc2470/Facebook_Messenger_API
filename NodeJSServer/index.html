@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Webhooks</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="/assets/meta.ico">
+</head>
+
+<body>
+<nav class="sidenav">
+    <ul>
+        <button class="sidebar-button" id="sidebar-button-menu">
+            <img src="/assets/menu.svg" alt="Menu">
+        </button>
+
+
+        <button class="sidebar-button-selected" id="sidebar-button-chat">
+            <img src="/assets/chat.svg" alt="Chat">
+            <button class="sidebar-button" id="sidebar-button-notification">
+                <img src="/assets/notification.svg" alt="Notification">
+            </button>
+        </button>
+        <button class="sidebar-button" id="sidebar-button-advisor">
+            <img src="/assets/advisor.svg" alt="Advisor">
+        </button>
+
+    </ul>
+</nav>
+
+<div id=".sidebar" class="sidebar">
+    <h2 class="sidebar-header">Tin nhắn</h2>
+
+    <div class="button-container">
+        <button class="button-selected">Tất cả</button>
+        <button>Facebook</button>
+        <button>Email</button>
+        <button>Zalo</button>
+        <button>Telegram</button>
+    </div>
+
+<!--    <div class="sidebar-contact">-->
+<!--        <img src="avatar3.jpg" alt="avatar">-->
+<!--        <div class="contact-info">-->
+<!--            <div class="row">-->
+<!--                <span>Phúc Đặng</span>-->
+<!--                <span class="badge"></span>-->
+<!--            </div>-->
+<!--            <span class="last-message">Last message...</span>-->
+<!--            <span class="timestamp">12:34 PM</span>-->
+<!--        </div>-->
+<!--        <span class="badge-right">1</span>-->
+<!--    </div>-->
+<!--    <div class="sidebar-contact-selected">-->
+<!--        <img src="avatar1.jpg" alt="avatar">-->
+<!--        <div class="contact-info">-->
+<!--            <span>Bảo Trân</span>-->
+<!--            <span class="last-message">Last message...</span>-->
+<!--            <span class="timestamp">12:34 PM</span>-->
+<!--        </div>-->
+<!--    </div>-->
+
+
+</div>
+<div class="column-fixed-height">
+    <div class="row-top">
+        <div class="sidebar-contact-top">
+            <img id="top-image" src="/assets/avatar3.jpg" alt="avatar">
+            <span id="top-name">Phúc Đặng</span>
+        </div>
+        <button class="attachment-button">
+            <img src="/assets/more_horiz.svg" alt="call">
+        </button>
+    </div>
+    <div class="message-container">
+        <div id="chat-messages">
+
+
+            <!-- <p id="invisible"></p>
+            <div class="row-mess" data-timestamp="1717598656715">
+                    <span id="left-span" style="text-align: right; background-color: rgb(211, 227, 253);">
+                        <p>drgedfrvg</p>
+                    </span>
+            </div>
+            <p id="timestamp-right">1717598656715</p> -->
+
+
+        </div>
+        <div id="send-section">
+            <button class="attachment-button" id="add">
+                <img src="/assets/add.svg" alt="add">
+            </button>
+            <button class="attachment-button" id="reaction">
+                <img src="/assets/reaction.svg" alt="reaction">
+            </button>
+
+            <input id="chat-input" type="text" placeholder="Nhập tin nhắn...">
+            <button class="send-button" id="chat-send" type="button">
+                <img src="/assets/send.svg" alt="Send">
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+<script src="chat.js"></script>
+<!-- <script src="server.js"></script> -->
+
+</html>

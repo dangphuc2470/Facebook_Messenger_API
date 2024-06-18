@@ -2,7 +2,6 @@ package com.dnhp.facebook_demo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.cloud.firestore.*;
-import com.google.cloud.firestore.EventListener;
 import com.google.firebase.cloud.FirestoreClient;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
@@ -21,8 +20,6 @@ import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.annotation.Nullable;
-
 @Service
 public class FirestoreService {
 	public final Firestore db;
@@ -32,7 +29,7 @@ public class FirestoreService {
 	}
 
 
-	/// Region chat received message
+	/// Region chat received message App Engine
 	public void putReceivedMessage(String senderId, String recipientId, String messageText, long timestamp)
 			throws ExecutionException, InterruptedException {
 		// Create the message data
@@ -99,24 +96,48 @@ public class FirestoreService {
 
 	}
 
+	public void findAdvisor(String senderId, long count) throws ExecutionException, InterruptedException
+    {
+		// Find the last advisor of conversation
+		if (count > 1)
+		{
+			// Get the advisorId of the last conversation
+			DocumentSnapshot advisorSnapshot = db.collection("message").document(senderId).collection(String.valueOf(count - 1)).document("conversation_metadata").get().get();
+			String advisorId = advisorSnapshot.getString("advisorId");
+			// Delete the advisor from the senderId document
+			db.collection("message").document(senderId).collection(String.valueOf(count -1 )).document("conversation_metadata")
+					.update("advisorId", FieldValue.delete());
+			// Decrement the conversation count for the advisor
+            if (advisorId != null)
+			{
+				db.collection("advisors").document(advisorId).update("conversationCount", FieldValue.increment(-1));
+			}
+		}
+
+		// Get the advisor with the least number of conversations
+		DocumentSnapshot advisorSnapshot = db.collection("advisors").orderBy("conversationCount").limit(1).get().get()
+				.getDocuments().get(0);
+		// Get the advisor name
+		String advisorId = advisorSnapshot.getId();
+		// Set the advisor name to the senderId document
+		db.collection("message").document(senderId).collection(String.valueOf(count)).document("conversation_metadata")
+    .update("advisorId", advisorId);
+		// Increment the conversation count for the advisor
+		db.collection("advisors").document(advisorId).update("conversationCount", FieldValue.increment(1));
+
+	}
+
 	public void putAdvisor(String advisorId, String name, String status)
-			throws ExecutionException, InterruptedException {
+	{
 		// Create the advisor data
 		Map<String, Object> advisorData = new HashMap<>();
 		advisorData.put("name", name);
 		advisorData.put("status", status);
-
+		advisorData.put("conversationCount", 0);
 		// Save the advisor data to Firestore
 		db.collection("advisors").document(advisorId).set(advisorData);
 	}
-
-
-	 public DocumentSnapshot getLastMessage(String userId) throws ExecutionException, InterruptedException {
-	 	return db.collection(userId).orderBy("timestamp", Query.Direction.DESCENDING).limit(1).get().get()
-	 			.getDocuments().get(0);
-	 }
-
-	 /// End region chat received message
+	 /// End region chat received message App Engine
 
 	public List<Map<String, Object>> getConversation(String conversationId)
 			throws Exception {
