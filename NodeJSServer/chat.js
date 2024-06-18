@@ -123,7 +123,7 @@ function fetchConversation(isFirstLoad = false) {
         })
         .then(() => {
             if (isFirstLoad) {
-                console.log("First load");
+                //console.log("First load");
                 contacts[0].click();
             }
         });
@@ -228,7 +228,7 @@ function updateConversation() {
                         const badgeElement = rowElement.querySelector('.badge');
 
                         if (badgeElement) {
-                            console.log("remove badge");
+                            //console.log("remove badge");
                             rowElement.removeChild(badgeElement);
                             let nameElement = rowElement.querySelector('.span-bold');
                             if (nameElement.textContent.endsWith("N/A")) {

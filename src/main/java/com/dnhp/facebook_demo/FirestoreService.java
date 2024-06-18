@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class FirestoreService {
@@ -30,8 +31,9 @@ public class FirestoreService {
 
 
 	/// Region chat received message App Engine
-	public void putReceivedMessage(String senderId, String recipientId, String messageText, long timestamp)
+	public void putReceivedMessage(String senderId, String recipientId, String messageText, long timestamp, RestTemplate restTemplate)
 			throws ExecutionException, InterruptedException {
+		Boolean isNeedToUpdateMessage = true;
 		// Create the message data
 		Map<String, Object> messageData = new HashMap<>();
 		messageData.put("messageText", messageText);
@@ -51,17 +53,19 @@ public class FirestoreService {
 		DocumentSnapshot conversationMetadataSnapshot = db.collection("message").document(senderId)
 				.collection(String.valueOf(count)).document("conversation_metadata").get().get();
 		Long lastMessageTimestamp = conversationMetadataSnapshot.getLong("lastMessageTimestamp");
-		if (lastMessageTimestamp != null && (timestamp - lastMessageTimestamp) > 60 * 60 * 24 * 1000) // New
-																										// conversation
-																										// if the last
-																										// message was
-																										// sent more
-																										// than 24 hour
-																										// ago
+		if (lastMessageTimestamp != null && (timestamp - lastMessageTimestamp) > 10 * 1000) // New
+		// conversation
+		// if the last
+		// message was
+		// sent more
+		// than 30m
+		// ago
 		{
 			count += 1;
 			senderDoc.getReference().update("conversationCount", count);
 			Logger.getGlobal().info("New conversation started");
+			findAdvisor(senderId, count);
+			isNeedToUpdateMessage = false;
 		}
 
 		// Save the message data to Firestore
@@ -77,7 +81,7 @@ public class FirestoreService {
 		DocumentSnapshot metadataDoc = db.collection("message").document(senderId).collection(String.valueOf(count))
 				.document("conversation_metadata").get().get();
 
-				// Create or update the metadata
+		// Create or update the metadata
 		Map<String, Object> metadata = new HashMap<>();
 		if (metadataDoc.exists()) {
 			metadata = metadataDoc.getData();
@@ -93,11 +97,40 @@ public class FirestoreService {
 		// Save the metadata to Firestore
 		db.collection("message").document(senderId).collection(String.valueOf(count)).document("conversation_metadata")
 				.set(metadata);
+		if (isNeedToUpdateMessage)
+		{
+			String response = restTemplate.getForObject("https://trusted-badger-fairly.ngrok-free.app/trigger-reload", String.class);
+			Logger.getGlobal().info(response);
+		}
+		else
+		{
+			String response = restTemplate.getForObject("https://trusted-badger-fairly.ngrok-free.app/trigger-conversation", String.class);
+			Logger.getGlobal().info(response);
+
+		}
+
 
 	}
 
+//	public void putAdvisor(String advisorId, String name, String status)
+//			throws ExecutionException, InterruptedException {
+//		// Create the advisor data
+//		Map<String, Object> advisorData = new HashMap<>();
+//		advisorData.put("name", name);
+//		advisorData.put("status", status);
+//
+//		// Save the advisor data to Firestore
+//		db.collection("advisors").document(advisorId).set(advisorData);
+//	}
+
+
+	// public DocumentSnapshot getLastMessage(String userId) throws ExecutionException, InterruptedException {
+	// 	return db.collection(userId).orderBy("timestamp", Query.Direction.DESCENDING).limit(1).get().get()
+	// 			.getDocuments().get(0);
+	// }
+
 	public void findAdvisor(String senderId, long count) throws ExecutionException, InterruptedException
-    {
+	{
 		// Find the last advisor of conversation
 		if (count > 1)
 		{
@@ -108,7 +141,7 @@ public class FirestoreService {
 			db.collection("message").document(senderId).collection(String.valueOf(count -1 )).document("conversation_metadata")
 					.update("advisorId", FieldValue.delete());
 			// Decrement the conversation count for the advisor
-            if (advisorId != null)
+			if (advisorId != null)
 			{
 				db.collection("advisors").document(advisorId).update("conversationCount", FieldValue.increment(-1));
 			}
@@ -121,7 +154,7 @@ public class FirestoreService {
 		String advisorId = advisorSnapshot.getId();
 		// Set the advisor name to the senderId document
 		db.collection("message").document(senderId).collection(String.valueOf(count)).document("conversation_metadata")
-    .update("advisorId", advisorId);
+				.update("advisorId", advisorId);
 		// Increment the conversation count for the advisor
 		db.collection("advisors").document(advisorId).update("conversationCount", FieldValue.increment(1));
 
@@ -187,7 +220,7 @@ public class FirestoreService {
 		for (Map<String, Object> conversation : conversations) {
 			String conversationNum = (String) conversation.get("conversationNum");
 			String conversationLastTimestamp = conversation.get("lastMessageTimestamp").toString();
-			//Logger.getGlobal().info("Conversation: " + conversationNum + " Last message timestamp: " + conversationLastTimestamp);
+			Logger.getGlobal().info("Conversation: " + conversationNum + " Last message timestamp: " + conversationLastTimestamp);
 		}
 
 		return conversations;

@@ -132,7 +132,7 @@ public class FacebookDemoApplication
         String messageText = firstMessaging.getJSONObject("message").getString("text");
 
         // Save the message to Firestore
-        firestoreService.putReceivedMessage(senderId, recipientId, messageText, timestamp);
+        firestoreService.putReceivedMessage(senderId, recipientId, messageText, timestamp, restTemplate);
         return "OK";
     }
 
